@@ -18,8 +18,8 @@
 	let time = 0;
 	const noise3D = createNoise3D();
 	const noiseDensity = 50;
-	const animationSpeed = 0.001;
-	const blur = 9;
+	const animationSpeed = 0.0005;
+	const blur = 5;
 	const brightness = 0.6;
 	const colorChangeRate = 0.05;
 	const pixelChangeRate = 0.5;
@@ -39,16 +39,16 @@
 		const screenHeight: number = window.innerHeight;
 		const aspectRatio: number = screenWidth / screenHeight;
 
-		if (screenWidth > screenHeight) {
-			canvasWidth = canvasSize;
-			canvasHeight = canvasSize / aspectRatio;
+		if (aspectRatio >= 1) {
 			miniWidth = miniSize;
-			miniHeight = miniSize / aspectRatio;
+			miniHeight = Math.floor(miniSize / aspectRatio);
+			canvasWidth = canvasSize;
+			canvasHeight = Math.floor(canvasSize / aspectRatio);
 		} else {
-			canvasWidth = canvasSize * aspectRatio;
-			canvasHeight = canvasSize;
-			miniWidth = miniSize * aspectRatio;
+			miniWidth = miniSize;
 			miniHeight = miniSize;
+			canvasWidth = Math.floor(canvasSize * aspectRatio);
+			canvasHeight = canvasSize;
 		}
 	};
 
@@ -107,12 +107,23 @@
 
 <style>
 	canvas {
+		z-index: -100;
 		position: fixed;
-		top: 0;
-		left: 0;
+		top: -125px;
+		left: -125px;
 		display: block;
-		height: calc(100vh + 10px);
-		height: calc(100lvh + 10px);
-		width: calc(100vw + 10px);
+		background-color: red;
+		height: calc(100vh + 250px);
+		height: calc(100lvh + 250px);
+		width: calc(100vw + 250px);
+		animation: background-spawn 2s ease;
+	}
+	@keyframes background-spawn {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
 	}
 </style>
