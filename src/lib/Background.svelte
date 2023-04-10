@@ -116,7 +116,7 @@
 		height: calc(100vh + 250px);
 		height: calc(100lvh + 250px);
 		width: calc(100vw + 250px);
-		animation: background-spawn 2s ease;
+		animation: background-spawn 10s ease;
 	}
 	@keyframes background-spawn {
 		0% {

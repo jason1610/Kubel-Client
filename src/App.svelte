@@ -1,20 +1,67 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import axios from "axios";
+
+	import dayjs from "dayjs";
+	import utc from "dayjs/plugin/utc";
+	import timezone from "dayjs/plugin/timezone";
+	dayjs.extend(utc);
+	dayjs.extend(timezone);
+
 	import Background from "./lib/Background.svelte";
 	import Header from "./lib/Header.svelte";
-	import loadingIcon from "./assets/loading-icon.gif";
+	import Error from "./lib/Error.svelte";
+	import Loading from "./lib/Loading.svelte";
+	import Game from "./lib/Game/Game.svelte";
 
 	let loadingState: String = "Loading";
-	let dailyData: JSON;
+	const version: number = 1;
+
+	import type { DailyData, ProgressData } from "./lib/Interfaces";
+	let dailyData: DailyData;
+	let progressData: ProgressData;
+
+	const progressDataTemplate: ProgressData = {
+		version: version,
+		seed: dayjs().tz("Etc/GMT-2").format("YYYYMMDD"),
+		moves: [{ offset: { x: 0, y: 0 }, position: { x: 0, y: 0 } }],
+		idMap: [[{ x: 0, y: 0 }]],
+		hasWon: false,
+	};
+
+	const fetchProgressData = () => {
+		let data: any = localStorage.getItem("progressData");
+		if (data) {
+			data = JSON.parse(data);
+			const currentDate: String = dayjs().tz("Etc/GMT-2").format("YYYYMMDD");
+			if (data.version && data.version === version && data.seed === currentDate) {
+				progressData = data;
+				return;
+			}
+		}
+		progressData = progressDataTemplate;
+		localStorage.setItem("progressData", JSON.stringify(progressDataTemplate));
+	};
 
 	const fetchDailyData = () => {
+		let data: any = localStorage.getItem("dailyData");
+		if (data) {
+			data = JSON.parse(data);
+			const currentDate: String = dayjs().tz("Etc/GMT-2").format("YYYYMMDD");
+			if (data.version && data.version === version && data.seed === currentDate) {
+				dailyData = data;
+				loadingState = "Loaded";
+				return;
+			} else {
+				localStorage.removeItem("dailyData");
+			}
+		}
 		axios
-			.get("https://api.kubel.io/daily")
+			.get("http://127.0.0.1:3000/daily")
 			.then((res) => {
 				if (res.status === 200) {
-					console.log(res.data);
 					dailyData = res.data;
+					localStorage.setItem("dailyData", JSON.stringify(res.data));
 					loadingState = "Loaded";
 				} else {
 					loadingState = "Error";
@@ -28,6 +75,7 @@
 
 	onMount(() => {
 		setTimeout(() => {
+			fetchProgressData();
 			fetchDailyData();
 		}, 1000);
 	});
@@ -37,20 +85,11 @@
 	<Header />
 	<div class="layout">
 		{#if loadingState === "Loading"}
-			<div class="loading">
-				<img src={loadingIcon} alt="Loading" />
-			</div>
+			<Loading />
 		{:else if loadingState === "Loaded"}
-			<div class="loaded">
-				<h1>Loaded</h1>
-			</div>
+			<Game {dailyData} {progressData} />
 		{:else if loadingState === "Error"}
-			<div class="error">
-				<h1>💀</h1>
-				<h1>Uh oh...</h1>
-				<p>Something went wrong.</p>
-				<p>Try refreshing the page.</p>
-			</div>
+			<Error />
 		{/if}
 	</div>
 	<Background />
@@ -63,30 +102,5 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-	}
-
-	.loading img {
-		width: 60px;
-		aspect-ratio: 1;
-		filter: drop-shadow(0 0 50px #ffffffad);
-		animation: loader-spawn 1s ease;
-	}
-
-	@keyframes loader-spawn {
-		0% {
-			opacity: 0;
-		}
-		100% {
-			opacity: 1;
-		}
-	}
-
-	.error {
-		text-align: center;
-	}
-
-	.error p {
-		font-size: 1.2rem;
-		color: #ffffffad;
 	}
 </style>
