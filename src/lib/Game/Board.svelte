@@ -3,7 +3,7 @@
 	export let mapData: MapData;
 
 	import { onMount } from "svelte";
-	import { moveCount, isMoving, hasWon } from "./GameStore";
+	import { moveCount, isMoving, hasWon, restart } from "./GameStore";
 	import * as PIXI from "pixi.js";
 	let app: PIXI.Application;
 	let canvas: HTMLCanvasElement;
@@ -171,11 +171,38 @@
 			}
 		}
 		if (completedColors.includes(false)) return false;
-		console.log("WIN");
 		return true;
 	};
 
+	restart.subscribe((value) => {
+		if (!value) return;
+		const defaultPieceMap = pieceMap.map((row: any[]) => [...row]);
+		for (let x = 0; x < gridSize; x++) {
+			for (let y = 0; y < gridSize; y++) {
+				if (pieceMap[x][y] === null) continue;
+				const pos = pieceMap[x][y].id.split("-").map((n) => parseInt(n));
+				defaultPieceMap[pos[0]][pos[1]] = pieceMap[x][y];
+				const piece = app.stage.getChildByName(`${x}-${y}`);
+				const newPos = {
+					x: x * gap + x * pieceSize + gap,
+					y: y * gap + y * pieceSize + gap,
+				};
+				piece.position.set(newPos.x, newPos.y);
+			}
+		}
+		moveCount.set(0);
+		hasWon.set(false);
+		restart.set(false);
+		const defaultMapData = JSON.parse(JSON.stringify(mapData));
+		defaultMapData.pieceMap = defaultPieceMap;
+		pieceMap = defaultPieceMap.map((row: any[]) => [...row]);
+		defaultMapData.moves = [];
+		localStorage.setItem("dailyData", JSON.stringify(defaultMapData));
+		allowInput = true;
+	});
+
 	const onPointerDown = (id: string) => {
+		if (!allowInput) return;
 		isDragging = true;
 		const piecePosition = getIdPosition(id);
 		const piecePixelPosition = worldToGrid(piecePosition);
@@ -224,7 +251,12 @@
 			newMapData.moves = moves;
 			localStorage.setItem("dailyData", JSON.stringify(newMapData));
 			moveCount.update((n) => n + 1);
-		}
+			if (checkForWin()) {
+				hasWon.set(true);
+				allowInput = false;
+			} else allowInput = true;
+		} else allowInput = true;
+
 		isDragging = false;
 		dragStart = { x: 0, y: 0 };
 		offset = { x: 0, y: 0 };
@@ -263,10 +295,14 @@
 		window.addEventListener("pointerup", (e) => {
 			onPointerUp();
 		});
+		if (checkForWin()) {
+			hasWon.set(true);
+			allowInput = false;
+		} else allowInput = true;
 	});
 </script>
 
-<div class="board">
+<div class="board" style="cursor: {allowInput ? (isDragging ? 'grabbing' : 'grab') : ''}">
 	<canvas bind:this={canvas} />
 </div>
 

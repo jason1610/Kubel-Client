@@ -1,23 +1,25 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import axios from "axios";
-
 	import dayjs from "dayjs";
+	import { onMount } from "svelte";
 	import utc from "dayjs/plugin/utc";
 	import timezone from "dayjs/plugin/timezone";
+
 	dayjs.extend(utc);
 	dayjs.extend(timezone);
 
-	import Background from "./lib/Background.svelte";
-	import Header from "./lib/Header.svelte";
 	import Error from "./lib/Error.svelte";
-	import Loading from "./lib/Loading.svelte";
+	import Header from "./lib/Header.svelte";
 	import Game from "./lib/Game/Game.svelte";
+	import Loading from "./lib/Loading.svelte";
+	import { hasWon } from "./lib/Game/GameStore";
+	import Background from "./lib/Background.svelte";
 
 	let loadingState: String = "Loading";
 	const version: number = 1;
 
 	import type { MapData } from "./lib/Interfaces";
+	import Statistics from "./lib/Statistics.svelte";
 	let dailyData: MapData;
 
 	const setDailyData = (data: any) => {
@@ -34,7 +36,6 @@
 			}
 		}
 		dailyData.moves = [];
-		dailyData.hasWon = false;
 		localStorage.setItem("dailyData", JSON.stringify(dailyData));
 	};
 
@@ -71,7 +72,6 @@
 		console.log(
 			"   __ ____  _____  ______     _    \n  / //_/ / / / _ )/ __/ /    (_)__ \n / ,< / /_/ / _  / _// /___ / / _ \\\n/_/|_|\\____/____/___/____(_)_/\\___/"
 		);
-		console.log("What you doing here 🤨");
 		setTimeout(() => {
 			fetchDailyData();
 		}, 1000);
@@ -85,6 +85,9 @@
 			<Loading />
 		{:else if loadingState === "Loaded"}
 			<Game mapData={dailyData} />
+			{#if $hasWon}
+				<Statistics />
+			{/if}
 		{:else if loadingState === "Error"}
 			<Error />
 		{/if}
@@ -94,6 +97,7 @@
 
 <style>
 	.layout {
+		gap: 50px;
 		min-height: 80vh;
 		min-height: 80lvh;
 		display: flex;

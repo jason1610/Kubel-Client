@@ -5,7 +5,6 @@ export interface MapData {
 	seed: string;
 	version: number;
 	moves: Move[];
-	hasWon: boolean;
 }
 
 export interface Move {

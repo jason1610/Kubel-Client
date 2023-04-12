@@ -1,16 +1,10 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-
 	import { moveCount, isMoving, hasWon } from "./GameStore";
-
-	let countValue: number = 0;
-	moveCount.subscribe((value) => {
-		countValue = value;
-	});
 </script>
 
-<div class="counter">
-	<p>{countValue}</p>
+<div class="counter {$hasWon ? 'win' : ''}">
+	<p>{$moveCount}</p>
 </div>
 
 <style>
@@ -26,6 +20,11 @@
 		border-radius: 20px;
 		margin-bottom: 50px;
 		padding: 10px;
+	}
+	.win {
+		background: rgb(201, 26, 26);
+		background: linear-gradient(to bottom, rgb(225, 189, 81), rgb(248, 221, 18));
+		box-shadow: 0 7.5px 0 0 rgb(227, 134, 5);
 	}
 	.counter p {
 		font-size: 56px;

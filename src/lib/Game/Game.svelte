@@ -1,23 +1,11 @@
 <script lang="ts">
+	export let mapData: MapData;
 	import { onMount } from "svelte";
 	import type { MapData } from "../Interfaces";
-	export let mapData: MapData;
-
-	import {
-		idMap,
-		hasWon,
-		pieceMap,
-		isMoving,
-		moveCount,
-		colorCount,
-		colorPalette,
-	} from "./GameStore";
-
+	import { pieceMap, moveCount, colorCount, colorPalette } from "./GameStore";
 	import Board from "./Board.svelte";
 	import Counter from "./Counter.svelte";
-
 	onMount(() => {
-		hasWon.set(mapData.hasWon);
 		pieceMap.set(mapData.pieceMap);
 		colorPalette.set(mapData.palette);
 		colorCount.set(mapData.colorCount);
@@ -32,8 +20,6 @@
 
 <style>
 	.game-wrapper {
-		width: 100%;
-		height: 100%;
 		display: flex;
 		align-self: start;
 		align-items: center;
