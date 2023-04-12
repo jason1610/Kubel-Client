@@ -19,9 +19,9 @@
 	onMount(() => {
 		hasWon.set(mapData.hasWon);
 		pieceMap.set(mapData.pieceMap);
+		colorPalette.set(mapData.palette);
 		colorCount.set(mapData.colorCount);
 		moveCount.set(mapData.moves.length);
-		colorPalette.set(mapData.palette);
 	});
 </script>
 

@@ -8,3 +8,4 @@ export const pieceMap = writable([[]]);
 export const isMoving = writable(false);
 export const colorPalette = writable([]);
 export const selectedColor = writable("white");
+export const completedColrs = writable([]);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MapData, Vector } from "../Interfaces";
+	import type { MapData, Vector, Move } from "../Interfaces";
 	export let mapData: MapData;
 
 	import { onMount } from "svelte";
@@ -16,13 +16,14 @@
 	const pieceSize: number = (canvasSize - gap * (gridSize + 1)) / gridSize;
 
 	let isDragging = false;
+	let selectedPiece: string = "";
 	let allowInput: boolean = false;
 	let offset: Vector = { x: 0, y: 0 };
 	let pieceMap: any = mapData.pieceMap;
 	let dragStart: Vector = { x: 0, y: 0 };
 	let lockedAxis: "x" | "y" | null = null;
 	let lastOffset: Vector = { x: 0, y: 0 };
-	let selectedPiece: Vector = { x: 0, y: 0 };
+	let selectedPos: Vector = { x: 0, y: 0 };
 
 	const getDisplayedCellSize = () => {
 		const currentCanvasWidth = canvas.clientWidth;
@@ -79,8 +80,8 @@
 			for (let y = 0; y < gridSize; y++) {
 				if (
 					pieceMap[x][y] === null ||
-					(lockedAxis === "x" && y !== selectedPiece.y) ||
-					(lockedAxis === "y" && x !== selectedPiece.x)
+					(lockedAxis === "x" && y !== selectedPos.y) ||
+					(lockedAxis === "y" && x !== selectedPos.x)
 				)
 					continue;
 
@@ -117,18 +118,75 @@
 		return { x: 0, y: 0 };
 	};
 
-	const onPointerDown = (x: number, y: number, e: any) => {
+	const floodFill = (posX: number, posY: number, targetColor: string) => {
+		let queue = [[posX, posY]];
+		let visited = [];
+		let count = 0;
+		while (queue.length > 0) {
+			let [x, y] = queue.shift();
+			if (visited.includes(x + "-" + y)) continue;
+			visited.push(x + "-" + y);
+			count++;
+
+			if (x > 0 && pieceMap[x - 1][y] !== null && pieceMap[x - 1][y].color === targetColor) {
+				queue.push([x - 1, y]);
+			}
+			if (
+				x < pieceMap.length - 1 &&
+				pieceMap[x + 1][y] !== null &&
+				pieceMap[x + 1][y].color === targetColor
+			) {
+				queue.push([x + 1, y]);
+			}
+			if (y > 0 && pieceMap[x][y - 1] !== null && pieceMap[x][y - 1].color === targetColor) {
+				queue.push([x, y - 1]);
+			}
+			if (
+				y < pieceMap[0].length - 1 &&
+				pieceMap[x][y + 1] !== null &&
+				pieceMap[x][y + 1].color === targetColor
+			) {
+				queue.push([x, y + 1]);
+			}
+		}
+		return count;
+	};
+
+	const findColorId = (color: string) => {
+		for (let x = 0; x < pieceMap.length; x++) {
+			for (let y = 0; y < pieceMap[0].length; y++) {
+				if (pieceMap[x][y] === null) continue;
+				if (pieceMap[x][y].color === color) return [x, y];
+			}
+		}
+		return [0, 0];
+	};
+
+	const checkForWin = () => {
+		let completedColors = new Array(mapData.colorCount.length).fill(true);
+		for (let i = 0; i < mapData.colorCount.length; i++) {
+			let [x, y] = findColorId(mapData.palette[i]);
+			if (floodFill(x, y, mapData.palette[i]) !== mapData.colorCount[i]) {
+				completedColors[i] = false;
+			}
+		}
+		if (completedColors.includes(false)) return false;
+		console.log("WIN");
+		return true;
+	};
+
+	const onPointerDown = (id: string) => {
 		isDragging = true;
-		const piecePosition = getIdPosition(`${x}-${y}`);
+		const piecePosition = getIdPosition(id);
 		const piecePixelPosition = worldToGrid(piecePosition);
 		const displayedCellSize = getDisplayedCellSize();
 		const pieceCenterX = piecePixelPosition.x + displayedCellSize / 2;
 		const pieceCenterY = piecePixelPosition.y + displayedCellSize / 2;
 		dragStart.x = pieceCenterX;
 		dragStart.y = pieceCenterY;
-		selectedPiece.x = piecePosition.x;
-		selectedPiece.y = piecePosition.y;
-		console.log(selectedPiece);
+		selectedPos.x = piecePosition.x;
+		selectedPos.y = piecePosition.y;
+		selectedPiece = id;
 		app.ticker.add(animate);
 	};
 
@@ -152,9 +210,22 @@
 
 	const onPointerUp = () => {
 		if (!isDragging) return;
-		isDragging = false;
 		app.ticker.remove(animate);
 		pieceMap = calculateNewPieceMap().map((row: any[]) => [...row]);
+		const selectedPieceNewPos = getIdPosition(selectedPiece);
+		if (
+			!(selectedPieceNewPos.x === selectedPos.x && selectedPieceNewPos.y === selectedPos.y)
+		) {
+			const newMapData = JSON.parse(JSON.stringify(mapData));
+			newMapData.pieceMap = pieceMap;
+			const move: Move = { offset, position: selectedPos };
+			let moves = JSON.parse(localStorage.getItem("dailyData")).moves;
+			moves.push(move);
+			newMapData.moves = moves;
+			localStorage.setItem("dailyData", JSON.stringify(newMapData));
+			moveCount.update((n) => n + 1);
+		}
+		isDragging = false;
 		dragStart = { x: 0, y: 0 };
 		offset = { x: 0, y: 0 };
 		lockedAxis = null;
@@ -180,7 +251,7 @@
 				piece.name = pieceMap[x][y].id;
 				piece.eventMode = "static";
 				piece.on("pointerdown", (e) => {
-					onPointerDown(x, y, e);
+					onPointerDown(piece.name);
 				});
 				app.stage.addChild(piece);
 			}

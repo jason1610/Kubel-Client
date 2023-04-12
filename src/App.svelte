@@ -28,7 +28,7 @@
 					dailyData.pieceMap[x][y] = null;
 				} else {
 					const id: string = `${x}-${y}`;
-					const obj = { id, color: dailyData.palette[data.pieceMap[x][y]] };
+					const obj = { id, color: dailyData.palette[data.pieceMap[x][y] - 1] };
 					dailyData.pieceMap[x][y] = obj;
 				}
 			}
@@ -68,6 +68,10 @@
 	};
 
 	onMount(() => {
+		console.log(
+			"   __ ____  _____  ______     _    \n  / //_/ / / / _ )/ __/ /    (_)__ \n / ,< / /_/ / _  / _// /___ / / _ \\\n/_/|_|\\____/____/___/____(_)_/\\___/"
+		);
+		console.log("What you doing here 🤨");
 		setTimeout(() => {
 			fetchDailyData();
 		}, 1000);
