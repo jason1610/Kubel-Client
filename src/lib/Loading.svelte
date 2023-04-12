@@ -10,7 +10,7 @@
 	.loading img {
 		width: 60px;
 		aspect-ratio: 1;
-		filter: drop-shadow(0 0 50px #ffffffad);
+		filter: drop-shadow(0 0 50px rgba(255, 255, 255, 0.25));
 		animation: loader-spawn 1s ease;
 	}
 

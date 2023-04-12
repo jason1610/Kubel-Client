@@ -1,24 +1,24 @@
-export interface DailyData {
-	colorMap: Array<Array<number>>;
+export interface MapData {
+	pieceMap: Array<Array<Piece>>;
 	colorCount: Array<number>;
+	palette: Array<string>;
 	seed: string;
 	version: number;
-}
-
-export interface ProgressData {
 	moves: Move[];
-	idMap: Array<Array<Position>>;
 	hasWon: boolean;
-	seed: string;
-	version: number;
 }
 
 export interface Move {
-	offset: Position;
-	position: Position;
+	offset: Vector;
+	position: Vector;
 }
 
-export interface Position {
+export interface Vector {
 	x: number;
 	y: number;
+}
+
+export interface Piece {
+	color: string;
+	id: string;
 }

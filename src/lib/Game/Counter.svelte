@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 
-	import type { DailyData, ProgressData } from "../Interfaces";
-
 	import { moveCount, isMoving, hasWon } from "./GameStore";
-
-	import Board from "./Board.svelte";
-	import Counter from "./Counter.svelte";
 
 	let countValue: number = 0;
 	moveCount.subscribe((value) => {
@@ -36,6 +31,7 @@
 		font-size: 56px;
 		font-weight: 700;
 		color: rgb(41, 43, 38);
+		text-align: center;
 		font-family: "Jura", sans-serif;
 	}
 </style>

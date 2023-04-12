@@ -17,30 +17,25 @@
 	let loadingState: String = "Loading";
 	const version: number = 1;
 
-	import type { DailyData, ProgressData } from "./lib/Interfaces";
-	let dailyData: DailyData;
-	let progressData: ProgressData;
+	import type { MapData } from "./lib/Interfaces";
+	let dailyData: MapData;
 
-	const progressDataTemplate: ProgressData = {
-		version: version,
-		seed: dayjs().tz("Etc/GMT-2").format("YYYYMMDD"),
-		moves: [{ offset: { x: 0, y: 0 }, position: { x: 0, y: 0 } }],
-		idMap: [[{ x: 0, y: 0 }]],
-		hasWon: false,
-	};
-
-	const fetchProgressData = () => {
-		let data: any = localStorage.getItem("progressData");
-		if (data) {
-			data = JSON.parse(data);
-			const currentDate: String = dayjs().tz("Etc/GMT-2").format("YYYYMMDD");
-			if (data.version && data.version === version && data.seed === currentDate) {
-				progressData = data;
-				return;
+	const setDailyData = (data: any) => {
+		dailyData = data;
+		for (let x = 0; x < dailyData.pieceMap.length; x++) {
+			for (let y = 0; y < dailyData.pieceMap[x].length; y++) {
+				if (data.pieceMap[x][y] === 0) {
+					dailyData.pieceMap[x][y] = null;
+				} else {
+					const id: string = `${x}-${y}`;
+					const obj = { id, color: dailyData.palette[data.pieceMap[x][y]] };
+					dailyData.pieceMap[x][y] = obj;
+				}
 			}
 		}
-		progressData = progressDataTemplate;
-		localStorage.setItem("progressData", JSON.stringify(progressDataTemplate));
+		dailyData.moves = [];
+		dailyData.hasWon = false;
+		localStorage.setItem("dailyData", JSON.stringify(dailyData));
 	};
 
 	const fetchDailyData = () => {
@@ -60,8 +55,7 @@
 			.get("http://127.0.0.1:3000/daily")
 			.then((res) => {
 				if (res.status === 200) {
-					dailyData = res.data;
-					localStorage.setItem("dailyData", JSON.stringify(res.data));
+					setDailyData(res.data);
 					loadingState = "Loaded";
 				} else {
 					loadingState = "Error";
@@ -75,7 +69,6 @@
 
 	onMount(() => {
 		setTimeout(() => {
-			fetchProgressData();
 			fetchDailyData();
 		}, 1000);
 	});
@@ -87,7 +80,7 @@
 		{#if loadingState === "Loading"}
 			<Loading />
 		{:else if loadingState === "Loaded"}
-			<Game {dailyData} {progressData} />
+			<Game mapData={dailyData} />
 		{:else if loadingState === "Error"}
 			<Error />
 		{/if}
