@@ -6,9 +6,14 @@
 	import { onMount } from "svelte";
 	import { moveCount, isMoving, hasWon, restart } from "./GameStore";
 	import axios from "axios";
+	import dayjs from "dayjs";
+	import timezone from "dayjs/plugin/timezone";
+	import utc from "dayjs/plugin/utc";
 	import * as PIXI from "pixi.js";
 	let app: PIXI.Application;
 	let canvas: HTMLCanvasElement;
+	dayjs.extend(utc);
+	dayjs.extend(timezone);
 
 	const canvasSize = 700;
 	const gap: number = 20;
@@ -238,6 +243,45 @@
 		}
 	};
 
+	const saveData = () => {
+		let userStats: any = localStorage.getItem("userStats");
+		const todaySeed = dayjs().tz("Etc/GMT-2").format("YYYYMMDD");
+		const yesterdaySeed = dayjs().tz("Etc/GMT-2").subtract(1, "day").format("YYYYMMDD");
+		if (!userStats) {
+			localStorage.setItem(
+				"userStats",
+				JSON.stringify({
+					gamesWon: 1,
+					scoreHistory: [$moveCount],
+					winStreak: 1,
+					lastWin: todaySeed,
+					dailyHighScore: $moveCount,
+				})
+			);
+		} else {
+			userStats = JSON.parse(userStats);
+			userStats.gamesWon++;
+			userStats.scoreHistory.push($moveCount);
+			if (userStats.scoreHistory.length > 10) {
+				userStats.scoreHistory.shift();
+			}
+			if (
+				moveCount < userStats.highScore ||
+				userStats.today !== todaySeed ||
+				!userStats.highScore
+			) {
+				userStats.highScore = $moveCount;
+			}
+			if (userStats.lastWin === yesterdaySeed) {
+				userStats.winStreak += 1;
+			} else {
+				userStats.winStreak = 1;
+			}
+			userStats.lastWin = todaySeed;
+			localStorage.setItem("userStats", JSON.stringify(userStats));
+		}
+	};
+
 	const onPointerUp = () => {
 		if (!isDragging) return;
 		app.ticker.remove(animate);
@@ -255,6 +299,7 @@
 			localStorage.setItem("dailyData", JSON.stringify(newMapData));
 			moveCount.update((n) => n + 1);
 			if (checkForWin()) {
+				saveData();
 				hasWon.set(true);
 				allowInput = false;
 				axios.post(apiBaseUrl + "/win", { moves });

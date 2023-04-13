@@ -20,7 +20,7 @@
 	const version: number = 1;
 
 	import type { MapData } from "./lib/Interfaces";
-	import Statistics from "./lib/Statistics.svelte";
+	import Statistics from "./lib/Statistics/Statistics.svelte";
 	let dailyData: MapData;
 
 	const setDailyData = (data: any) => {
