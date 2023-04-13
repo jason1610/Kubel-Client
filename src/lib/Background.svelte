@@ -2,12 +2,13 @@
 	import { onMount } from "svelte";
 	import { createNoise3D } from "simplex-noise";
 	import { palette, completedColors } from "./Game/GameStore";
+	const noise3D = createNoise3D();
+
 	let miniCanvas: HTMLCanvasElement = document.createElement("canvas");
 	const miniCtx: CanvasRenderingContext2D = miniCanvas.getContext("2d");
 	const miniSize: number = 50;
 	let miniWidth: number;
 	let miniHeight: number;
-
 	let canvas: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D;
 	const canvasSize: number = 200;
@@ -16,21 +17,22 @@
 	let prevImageData: Uint8ClampedArray;
 
 	let time = 0;
-	const noise3D = createNoise3D();
-	const noiseDensity = 50;
-	const animationSpeed = 0.0005;
 	const blur = 5;
 	const brightness = 0.6;
-	const colorChangeRate = 0.01;
+	const noiseDensity = 50;
+	const colorChangeRate = 0.05;
+	const paleteChangeRate = 0.01;
+	const animationSpeed = 0.0005;
 	const defaultPalette: number[][] = [
-		[25, 25, 25],
+		[5, 5, 5],
 		[55, 55, 55],
 		[5, 5, 5],
 		[50, 50, 50],
 		[15, 15, 15],
 		[15, 15, 15],
 	];
-	let targetPalette: number[][] = defaultPalette;
+	let targetPalette: number[][] = [...defaultPalette.map((color) => [...color])];
+	let currentPalette: number[][] = [...defaultPalette.map((color) => [...color])];
 
 	const hexToRgb = (hex) => {
 		let r = parseInt(hex.substring(1, 3), 16);
@@ -57,10 +59,19 @@
 		}
 	};
 
+	const lerpCurrentPalette = () => {
+		for (let i = 0; i < targetPalette.length; i++) {
+			for (let j = 0; j < targetPalette[i].length; j++) {
+				currentPalette[i][j] =
+					currentPalette[i][j] +
+					(targetPalette[i][j] - currentPalette[i][j]) * paleteChangeRate;
+			}
+		}
+	};
 	const getTargetColor = (noiseValue: number) => {
-		const index = Math.floor(((noiseValue + 1) / 2) * targetPalette.length);
-		const clampedIndex = Math.min(index, targetPalette.length - 1);
-		const targetColor = targetPalette[clampedIndex];
+		const index = Math.floor(((noiseValue + 1) / 2) * currentPalette.length);
+		const clampedIndex = Math.min(index, currentPalette.length - 1);
+		const targetColor = currentPalette[clampedIndex];
 		return targetColor;
 	};
 
@@ -78,9 +89,7 @@
 				const targetColor = getTargetColor(noiseValue);
 
 				const newColor = currentColor.map((color, i) => {
-					const diff = targetColor[i] - color;
-					const change = diff * colorChangeRate;
-					return color + change;
+					return color + (targetColor[i] - color) * colorChangeRate;
 				});
 
 				data[index] = newColor[0]; // Red
@@ -98,6 +107,7 @@
 
 	const animate = () => {
 		drawNoise();
+		lerpCurrentPalette();
 		requestAnimationFrame(animate);
 	};
 
@@ -108,15 +118,15 @@
 		window.addEventListener("resize", updateCanvasSize);
 		completedColors.subscribe(() => {
 			if ($palette && $completedColors) {
-				console.log($completedColors);
 				targetPalette = $palette.map((color) => hexToRgb(color));
 				for (let i = 0; i < targetPalette.length; i++) {
 					if (!$completedColors[i]) {
 						targetPalette[i] = defaultPalette[i];
 					}
 				}
+				currentPalette = currentPalette.slice(0, targetPalette.length);
 			} else {
-				targetPalette = defaultPalette;
+				targetPalette = [...defaultPalette.map((color) => [...color])];
 			}
 		});
 	});
@@ -135,7 +145,7 @@
 		height: calc(100vh + 250px);
 		height: calc(100lvh + 250px);
 		width: calc(100vw + 250px);
-		animation: background-spawn 10s ease;
+		animation: background-spawn 4s ease;
 	}
 	@keyframes background-spawn {
 		0% {
