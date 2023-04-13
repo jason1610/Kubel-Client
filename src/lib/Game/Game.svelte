@@ -2,12 +2,12 @@
 	export let mapData: MapData;
 	import { onMount } from "svelte";
 	import type { MapData } from "../Interfaces";
-	import { pieceMap, moveCount, colorCount, colorPalette } from "./GameStore";
+	import { pieceMap, moveCount, palette } from "./GameStore";
 	import Board from "./Board.svelte";
 	import Counter from "./Counter.svelte";
 	onMount(() => {
 		pieceMap.set(mapData.pieceMap);
-		colorPalette.set(mapData.palette);
+		palette.set(mapData.palette);
 		moveCount.set(mapData.moves.length);
 	});
 </script>

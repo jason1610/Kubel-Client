@@ -4,7 +4,7 @@
 	import type { MapData, Vector, Move } from "../Interfaces";
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	import { onMount } from "svelte";
-	import { moveCount, isMoving, hasWon, restart } from "./GameStore";
+	import { moveCount, isMoving, hasWon, restart, completedColors } from "./GameStore";
 	import axios from "axios";
 	import dayjs from "dayjs";
 	import timezone from "dayjs/plugin/timezone";
@@ -171,14 +171,15 @@
 	};
 
 	const checkForWin = () => {
-		let completedColors = new Array(colorCount.length).fill(true);
+		let matchedColors = new Array(colorCount.length).fill(true);
 		for (let i = 0; i < colorCount.length; i++) {
 			let [x, y] = findColorId(mapData.palette[i]);
 			if (floodFill(x, y, mapData.palette[i]) !== colorCount[i]) {
-				completedColors[i] = false;
+				matchedColors[i] = false;
 			}
 		}
-		if (completedColors.includes(false)) return false;
+		completedColors.set(matchedColors);
+		if (matchedColors.includes(false)) return false;
 		return true;
 	};
 
@@ -200,6 +201,7 @@
 		}
 		moveCount.set(0);
 		hasWon.set(false);
+		completedColors.set(new Array(colorCount.length).fill(false));
 		restart.set(false);
 		const defaultMapData = JSON.parse(JSON.stringify(mapData));
 		defaultMapData.pieceMap = defaultPieceMap;
