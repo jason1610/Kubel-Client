@@ -15,6 +15,7 @@
 	import { hasWon } from "./lib/Game/GameStore";
 	import Background from "./lib/Background.svelte";
 
+	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	let loadingState: String = "Loading";
 	const version: number = 1;
 
@@ -53,7 +54,7 @@
 			}
 		}
 		axios
-			.get("http://127.0.0.1:3000/daily")
+			.get(apiBaseUrl + "/daily")
 			.then((res) => {
 				if (res.status === 200) {
 					setDailyData(res.data);

@@ -1,6 +1,5 @@
 export interface MapData {
 	pieceMap: Array<Array<Piece>>;
-	colorCount: Array<number>;
 	palette: Array<string>;
 	seed: string;
 	version: number;

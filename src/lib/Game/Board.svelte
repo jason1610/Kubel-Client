@@ -1,15 +1,18 @@
 <script lang="ts">
-	import type { MapData, Vector, Move } from "../Interfaces";
 	export let mapData: MapData;
 
+	import type { MapData, Vector, Move } from "../Interfaces";
+	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	import { onMount } from "svelte";
 	import { moveCount, isMoving, hasWon, restart } from "./GameStore";
+	import axios from "axios";
 	import * as PIXI from "pixi.js";
 	let app: PIXI.Application;
 	let canvas: HTMLCanvasElement;
 
 	const canvasSize = 700;
 	const gap: number = 20;
+	let colorCount: number[];
 	const borderRadius: number = 30;
 	let gridSize: number = mapData.pieceMap.length;
 	const cellSize: number = canvasSize / gridSize;
@@ -163,10 +166,10 @@
 	};
 
 	const checkForWin = () => {
-		let completedColors = new Array(mapData.colorCount.length).fill(true);
-		for (let i = 0; i < mapData.colorCount.length; i++) {
+		let completedColors = new Array(colorCount.length).fill(true);
+		for (let i = 0; i < colorCount.length; i++) {
 			let [x, y] = findColorId(mapData.palette[i]);
-			if (floodFill(x, y, mapData.palette[i]) !== mapData.colorCount[i]) {
+			if (floodFill(x, y, mapData.palette[i]) !== colorCount[i]) {
 				completedColors[i] = false;
 			}
 		}
@@ -254,6 +257,7 @@
 			if (checkForWin()) {
 				hasWon.set(true);
 				allowInput = false;
+				axios.post(apiBaseUrl + "/win", { moves });
 			} else allowInput = true;
 		} else allowInput = true;
 
@@ -263,7 +267,21 @@
 		lockedAxis = null;
 	};
 
+	const getColorCount = () => {
+		let count = new Array(mapData.palette.length).fill(0);
+		for (let x = 0; x < gridSize; x++) {
+			for (let y = 0; y < gridSize; y++) {
+				if (pieceMap[x][y] === null) continue;
+				const color = pieceMap[x][y].color;
+				const index = mapData.palette.indexOf(color);
+				count[index] = count[index] + 1;
+			}
+		}
+		return count;
+	};
+
 	onMount(() => {
+		colorCount = getColorCount();
 		app = new PIXI.Application({
 			width: canvasSize,
 			height: canvasSize,
