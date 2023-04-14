@@ -14,6 +14,7 @@
 	import Loading from "./lib/Loading.svelte";
 	import { hasWon } from "./lib/Game/GameStore";
 	import Background from "./lib/Background.svelte";
+	import CountryPicker from "./lib/CountryPicker.svelte";
 
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	let loadingState: String = "Loading";
@@ -22,6 +23,7 @@
 	import type { MapData } from "./lib/Interfaces";
 	import Statistics from "./lib/Statistics/Statistics.svelte";
 	let dailyData: MapData;
+	let hasCountry = false;
 
 	const setDailyData = (data: any) => {
 		dailyData = data;
@@ -73,6 +75,11 @@
 		console.log(
 			"   __ ____  _____  ______     _    \n  / //_/ / / / _ )/ __/ /    (_)__ \n / ,< / /_/ / _  / _// /___ / / _ \\\n/_/|_|\\____/____/___/____(_)_/\\___/"
 		);
+
+		const userCountry = localStorage.getItem("userCountry");
+		if (userCountry) {
+			hasCountry = true;
+		}
 		setTimeout(() => {
 			fetchDailyData();
 		}, 1000);
@@ -85,7 +92,11 @@
 		{#if loadingState === "Loading"}
 			<Loading />
 		{:else if loadingState === "Loaded"}
-			<Game mapData={dailyData} />
+			{#if !hasCountry}
+				<CountryPicker on:play={() => (hasCountry = true)} />
+			{:else}
+				<Game mapData={dailyData} />
+			{/if}
 			{#if $hasWon}
 				<Statistics />
 			{/if}

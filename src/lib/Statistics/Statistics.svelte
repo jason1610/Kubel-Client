@@ -17,7 +17,7 @@
 		align-items: center;
 		flex-direction: column;
 		background: rgba(20, 20, 30, 0.5);
-		background: linear-gradient(20deg, rgba(4, 4, 4, 0.5), rgba(24, 26, 32, 0.5));
+		background: linear-gradient(20deg, rgba(4, 4, 4, 0.7), rgba(17, 23, 38, 0.7));
 		padding: 20px;
 		border-radius: 10px;
 		gap: 20px;
