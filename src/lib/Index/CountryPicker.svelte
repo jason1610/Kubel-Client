@@ -30,7 +30,6 @@
 
 	const handleChange = (event) => {
 		selectedCountry = event.target.value;
-		console.log("Selected country:", selectedCountry);
 	};
 
 	const handlePlay = () => {
@@ -81,5 +80,9 @@
 		text-align: center;
 		font-size: 3rem;
 		margin-bottom: 1rem;
+	}
+	select option {
+		max-height: 10px; /* set the maximum height of the dropdown list */
+		overflow-y: auto; /* enable vertical scrolling if needed */
 	}
 </style>

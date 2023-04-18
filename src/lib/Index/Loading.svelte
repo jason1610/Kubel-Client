@@ -1,5 +1,5 @@
 <script lang="ts">
-	import loadingIcon from "../assets/loading-icon.gif";
+	import loadingIcon from "../../assets/loading-icon.gif";
 </script>
 
 <div class="loading">
@@ -7,6 +7,17 @@
 </div>
 
 <style>
+	.loading {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
 	.loading img {
 		width: 60px;
 		aspect-ratio: 1;

@@ -20,3 +20,12 @@ export interface Piece {
 	color: string;
 	id: string;
 }
+
+export interface UserStats {
+	gamesWon: number;
+	scoreHistory: number[];
+	winStreak: number;
+	lastWin: string;
+	dailyHighScore: number;
+	dailyHistory: number[];
+}

@@ -8,19 +8,19 @@
 	dayjs.extend(utc);
 	dayjs.extend(timezone);
 
-	import Error from "./lib/Error.svelte";
-	import Header from "./lib/Header.svelte";
+	import Error from "./lib/Index/Error.svelte";
+	import Header from "./lib/Index/Header.svelte";
 	import Game from "./lib/Game/Game.svelte";
-	import Loading from "./lib/Loading.svelte";
+	import Loading from "./lib/Index/Loading.svelte";
 	import { hasWon } from "./lib/Game/GameStore";
-	import Background from "./lib/Background.svelte";
-	import CountryPicker from "./lib/CountryPicker.svelte";
+	import Background from "./lib/Index/Background.svelte";
+	import CountryPicker from "./lib/Index/CountryPicker.svelte";
 
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	let loadingState: String = "Loading";
 	const version: number = 1;
 
-	import type { MapData } from "./lib/Interfaces";
+	import type { MapData } from "./Interfaces";
 	import Statistics from "./lib/Statistics/Statistics.svelte";
 	let dailyData: MapData;
 	let hasCountry = false;
@@ -110,10 +110,18 @@
 <style>
 	.layout {
 		gap: 50px;
-		min-height: 80vh;
-		min-height: 80lvh;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		align-items: center;
+		padding: 0 20px;
+		padding-bottom: 10vh;
+		/* flex-direction: column; */
+		/* background-color: red; */
+	}
+	@media (orientation: portrait), (max-width: 1400px) {
+		.layout {
+			flex-direction: column;
+		}
 	}
 </style>

@@ -8,7 +8,7 @@
 	let chartRef: HTMLCanvasElement;
 	let chart: Chart;
 
-	const getGradient = (ctx, chartArea) => {
+	const dataLineGradient = (ctx, chartArea) => {
 		let width, height, gradient;
 		const chartWidth = chartArea.right - chartArea.left;
 		const chartHeight = chartArea.bottom - chartArea.top;
@@ -20,7 +20,29 @@
 			gradient.addColorStop(0.5, "#f7ff54");
 			gradient.addColorStop(1, "#d60626");
 		}
+		return gradient;
+	};
 
+	const dataFillGradient = (ctx, chartArea) => {
+		let width, height, gradient;
+		const chartWidth = chartArea.right - chartArea.left;
+		const chartHeight = chartArea.bottom - chartArea.top;
+		if (!gradient || width !== chartWidth || height !== chartHeight) {
+			width = chartWidth;
+			height = chartHeight;
+			gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+			gradient.addColorStop(0, "rgba(87, 255, 84, 0)");
+			gradient.addColorStop(0.5, "rgba(247, 255, 84, 0.25)");
+			gradient.addColorStop(1, "rgba(214, 6, 38, 0.5)");
+		}
+		return gradient;
+	};
+
+	const axisLineGradient = (ctx, chartArea) => {
+		const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+		gradient.addColorStop(0, "rgba(59, 71, 88, 0.2)");
+		gradient.addColorStop(0.5, "rgba(59, 71, 88, 0.5)");
+		gradient.addColorStop(1, "rgba(59, 71, 88, 0.2)");
 		return gradient;
 	};
 
@@ -30,7 +52,20 @@
 			{
 				type: "line",
 				data: userStats.scoreHistory,
-				fill: false,
+				fill: {
+					target: "origin",
+					above: function (context) {
+						const chart = context.chart;
+						const { ctx, chartArea } = chart;
+
+						if (!chartArea) {
+							// This case happens on initial chart load
+							return;
+						}
+
+						return dataFillGradient(ctx, chartArea);
+					},
+				},
 				tension: 0.5,
 				backgroundColor: "rgba(255, 255, 255, 0.2)",
 				borderColor: function (context) {
@@ -41,7 +76,7 @@
 						// This case happens on initial chart load
 						return;
 					}
-					return getGradient(ctx, chartArea);
+					return dataLineGradient(ctx, chartArea);
 				},
 			},
 		],
@@ -56,12 +91,12 @@
 			includeInivisible: false,
 		},
 		layout: {
-			padding: {
-				top: 20,
-				bottom: 10,
-				left: 5,
-				right: 15,
-			},
+			// padding: {
+			// 	top: 20,
+			// 	bottom: 10,
+			// 	left: 5,
+			// 	right: 15,
+			// },
 		},
 		plugins: {
 			legend: {
@@ -75,8 +110,8 @@
 				yAlign: "bottom",
 				titleAlign: "center",
 				lineHeight: -5,
-				backgroundColor: "white",
-				titleColor: "black",
+				backgroundColor: "#586A84",
+				titleColor: "white",
 				titleFont: {
 					weight: "bold",
 				},
@@ -104,7 +139,17 @@
 			},
 			y: {
 				grid: {
-					display: false,
+					color: function (context) {
+						const chart = context.chart;
+						const { ctx, chartArea } = chart;
+
+						if (!chartArea) {
+							// This case happens on initial chart load
+							return;
+						}
+						return axisLineGradient(ctx, chartArea);
+					},
+					lineWidth: 1.5,
 				},
 				border: {
 					display: false,
@@ -114,11 +159,11 @@
 					autoSkip: false,
 					maxTicksLimit: 5,
 					maxRotation: 0,
-					color: "rgba(255, 255, 255, 0.75)",
+					color: "#3B4758",
 					font: {
-						size: 15,
-						family: "sans-serif",
-						weight: "bold",
+						size: 12,
+						// family: "JURA",
+						// weight: "bold",
 					},
 				},
 			},
@@ -139,14 +184,32 @@
 </script>
 
 <div class="card">
-	<canvas bind:this={chartRef} />
+	<h2>My History</h2>
+	<div class="chart-container">
+		<canvas bind:this={chartRef} />
+	</div>
 </div>
 
 <style>
 	.card {
-		background: var(--card-background-flat);
-		background: var(--card-background-gradient);
-		border-radius: var(--card-border-radius);
-		box-shadow: var(--card-shadow);
+		grid-column: 2 / span 3;
+		grid-row: 2 / span 3;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	h2 {
+		font: var(--card-title-font);
+		text-align: center;
+	}
+
+	.chart-container {
+		width: 100%;
+		height: 100%;
+	}
+	canvas {
+		width: 100%;
+		height: 100%;
 	}
 </style>

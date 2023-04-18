@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let mapData: MapData;
 
-	import type { MapData, Vector, Move } from "../Interfaces";
+	import type { MapData, Vector, Move, UserStats } from "../../Interfaces";
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	import { onMount } from "svelte";
 	import { moveCount, isMoving, hasWon, restart, completedColors } from "./GameStore";
@@ -15,12 +15,13 @@
 	dayjs.extend(utc);
 	dayjs.extend(timezone);
 
-	const canvasSize = 700;
+	const canvasSize = 600;
 	const gap: number = 20;
 	let colorCount: number[];
-	const borderRadius: number = 30;
+	const pieceSpeed: number = 0.4;
 	let gridSize: number = mapData.pieceMap.length;
 	const cellSize: number = canvasSize / gridSize;
+	const borderRadius: number = cellSize / 7;
 	const pieceSize: number = (canvasSize - gap * (gridSize + 1)) / gridSize;
 
 	let isDragging = false;
@@ -29,8 +30,9 @@
 	let offset: Vector = { x: 0, y: 0 };
 	let pieceMap: any = mapData.pieceMap;
 	let dragStart: Vector = { x: 0, y: 0 };
-	let lockedAxis: "x" | "y" | null = null;
 	let lastOffset: Vector = { x: 0, y: 0 };
+	let lockedAxis: "x" | "y" | null = null;
+	let offsetDelta: Vector = { x: 0, y: 0 };
 	let selectedPos: Vector = { x: 0, y: 0 };
 
 	const getDisplayedCellSize = () => {
@@ -100,9 +102,15 @@
 		return newPieceMap;
 	};
 
+	const lerpPos = (start: number, end: number) => {
+		return start + (end - start) * pieceSpeed;
+	};
+	const lerpSize = (start: number, end: number) => {
+		return start + (end - start) * pieceSpeed * 2;
+	};
+
 	const animate = () => {
 		const newPieceMap = calculateNewPieceMap();
-		lastOffset = offset;
 		for (let x = 0; x < gridSize; x++) {
 			for (let y = 0; y < gridSize; y++) {
 				if (pieceMap[x][y] === null) continue;
@@ -111,7 +119,26 @@
 					x: x * gap + x * pieceSize + gap,
 					y: y * gap + y * pieceSize + gap,
 				};
-				piece.position.set(newPos.x, newPos.y);
+				piece.position.set(
+					lerpPos(piece.position.x, newPos.x),
+					lerpPos(piece.position.y, newPos.y)
+				);
+				//get offset between old and new position
+				const pieceOffset = {
+					x: newPos.x - piece.position.x,
+					y: newPos.y - piece.position.y,
+				};
+
+				if (
+					(pieceOffset.x !== 0 && Math.sign(pieceOffset.x) !== offsetDelta.x) ||
+					(pieceOffset.y !== 0 && Math.sign(pieceOffset.y) !== offsetDelta.y)
+				) {
+					piece.zIndex = 10;
+					// piece.scale.set(0.3);
+				} else {
+					piece.scale.set(1);
+					piece.zIndex = 0;
+				}
 			}
 		}
 	};
@@ -224,7 +251,6 @@
 		selectedPos.x = piecePosition.x;
 		selectedPos.y = piecePosition.y;
 		selectedPiece = id;
-		app.ticker.add(animate);
 	};
 
 	const onPointerMove = (e: any) => {
@@ -243,13 +269,18 @@
 			offset.x = 0;
 			offset.y = gridOffsetY;
 		}
+		if (offset.x === lastOffset.x && offset.y === lastOffset.y) return;
+		offsetDelta.x = offset.x - lastOffset.x;
+		offsetDelta.y = offset.y - lastOffset.y;
+		lastOffset = { x: offset.x, y: offset.y };
 	};
 
 	const saveData = () => {
-		let userStats: any = localStorage.getItem("userStats");
+		let userStatsString = localStorage.getItem("userStats");
+		let userStats: any;
 		const todaySeed = dayjs().tz("Etc/GMT-2").format("YYYYMMDD");
 		const yesterdaySeed = dayjs().tz("Etc/GMT-2").subtract(1, "day").format("YYYYMMDD");
-		if (!userStats) {
+		if (!userStatsString) {
 			localStorage.setItem(
 				"userStats",
 				JSON.stringify({
@@ -258,15 +289,17 @@
 					winStreak: 1,
 					lastWin: todaySeed,
 					dailyHighScore: $moveCount,
+					dailyHistory: [$moveCount],
 				})
 			);
 		} else {
-			userStats = JSON.parse(userStats);
+			userStats = JSON.parse(userStatsString);
 			userStats.gamesWon++;
 			userStats.scoreHistory.push($moveCount);
-			if (userStats.scoreHistory.length > 10) {
-				userStats.scoreHistory.shift();
-			}
+			if (userStats)
+				if (userStats.scoreHistory.length > 10) {
+					userStats.scoreHistory.shift();
+				}
 			if (
 				moveCount < userStats.highScore ||
 				userStats.today !== todaySeed ||
@@ -279,6 +312,12 @@
 			} else {
 				userStats.winStreak = 1;
 			}
+			if (userStats.lastWin !== todaySeed) {
+				userStats.dailyHistory = [$moveCount];
+			} else {
+				userStats.dailyHistory.push($moveCount);
+			}
+
 			userStats.lastWin = todaySeed;
 			localStorage.setItem("userStats", JSON.stringify(userStats));
 		}
@@ -286,7 +325,6 @@
 
 	const onPointerUp = () => {
 		if (!isDragging) return;
-		app.ticker.remove(animate);
 		pieceMap = calculateNewPieceMap().map((row: any[]) => [...row]);
 		const selectedPieceNewPos = getIdPosition(selectedPiece);
 		if (
@@ -301,10 +339,18 @@
 			localStorage.setItem("dailyData", JSON.stringify(newMapData));
 			moveCount.update((n) => n + 1);
 			if (checkForWin()) {
-				saveData();
 				hasWon.set(true);
 				allowInput = false;
-				axios.post(apiBaseUrl + "/win", { moves });
+				const userCountry = localStorage.getItem("userCountry");
+				const userStats = JSON.parse(localStorage.getItem("userStats"));
+				if (
+					userCountry !== null &&
+					userCountry !== "XX"
+					// (userStats == null || !userStats.dailyHistory.includes(moves.length))
+				) {
+					axios.post(apiBaseUrl + "/win", { moves, iso: userCountry });
+				}
+				saveData();
 			} else allowInput = true;
 		} else allowInput = true;
 
@@ -327,6 +373,18 @@
 		return count;
 	};
 
+	const lighterHex = (color) => {
+		const lighten = 10;
+		const hex = color.replace("#", "");
+		const r = parseInt(hex.substring(0, 2), 16);
+		const g = parseInt(hex.substring(2, 4), 16);
+		const b = parseInt(hex.substring(4, 6), 16);
+		const newR = Math.min(255, r + lighten);
+		const newG = Math.min(255, g + lighten);
+		const newB = Math.min(255, b + lighten);
+		return `#${newR.toString(16)}${newG.toString(16)}${newB.toString(16)}`;
+	};
+
 	onMount(() => {
 		colorCount = getColorCount();
 		app = new PIXI.Application({
@@ -336,12 +394,25 @@
 			antialias: true,
 			backgroundAlpha: 0,
 		});
+		app.ticker.add(animate);
 		for (let x = 0; x < gridSize; x++) {
 			for (let y = 0; y < gridSize; y++) {
 				if (pieceMap[x][y] === null) continue;
 				const piece = new PIXI.Graphics();
-				piece.beginFill(pieceMap[x][y].color);
+				piece.beginFill(lighterHex(pieceMap[x][y].color));
 				piece.drawRoundedRect(0, 0, pieceSize, pieceSize, borderRadius);
+				const innerPieceSize = pieceSize * 0.8;
+				const innerPieceX = (pieceSize - innerPieceSize) / 2;
+				const innerPieceY = (pieceSize - innerPieceSize) / 2;
+				piece.beginFill(pieceMap[x][y].color);
+				piece.drawRoundedRect(
+					innerPieceX,
+					innerPieceY,
+					innerPieceSize,
+					innerPieceSize,
+					borderRadius * 0.8
+				);
+				piece.endFill();
 				piece.hitArea = new PIXI.Rectangle(0, 0, cellSize, cellSize);
 				piece.position.set(x * gap + x * pieceSize + gap, y * gap + y * pieceSize + gap);
 				piece.endFill();
@@ -353,6 +424,7 @@
 				app.stage.addChild(piece);
 			}
 		}
+
 		app.stage.eventMode = "static";
 		window.addEventListener("pointermove", (e) => {
 			onPointerMove(e);
@@ -373,21 +445,17 @@
 
 <style>
 	.board {
-		/* width: min(90vw, 60vh); */
-		width: 100%;
-		max-width: min(600px, 90vw);
+		/* max-width: min(600px, 90vw); */
+		width: 550px;
 		aspect-ratio: 1/1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		border-radius: 35px;
-		background: rgba(0, 0, 0, 0.5);
-		/* overflow: hidden; */
-		/* pointer-events: pass-through; */
+		background: rgba(0, 0, 0, 0.75);
 	}
 	canvas {
 		width: 100%;
 		height: 100%;
-		/* border-radius: 10px; */
 	}
 </style>

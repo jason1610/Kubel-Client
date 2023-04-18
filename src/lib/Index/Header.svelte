@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import logo from "../assets/logo.svg";
-	import help from "../assets/help-icon.svg";
+	import logo from "../../assets/logo.svg";
+	import help from "../../assets/help-icon.svg";
 </script>
 
 <header>

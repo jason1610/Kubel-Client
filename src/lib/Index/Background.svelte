@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { createNoise3D } from "simplex-noise";
-	import { palette, completedColors } from "./Game/GameStore";
+	import { palette, completedColors } from "../Game/GameStore";
 	const noise3D = createNoise3D();
 
 	let miniCanvas: HTMLCanvasElement = document.createElement("canvas");

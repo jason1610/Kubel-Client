@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let mapData: MapData;
 	import { onMount } from "svelte";
-	import type { MapData } from "../Interfaces";
+	import type { MapData } from "../../Interfaces";
 	import { pieceMap, moveCount, palette } from "./GameStore";
 	import Board from "./Board.svelte";
 	import Counter from "./Counter.svelte";
@@ -20,7 +20,6 @@
 <style>
 	.game-wrapper {
 		display: flex;
-		align-self: start;
 		align-items: center;
 		flex-direction: column;
 		justify-content: center;
