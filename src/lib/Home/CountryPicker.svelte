@@ -1,24 +1,24 @@
-<script>
-	import { userCountry } from "../GlobalStore";
+<script lang="ts">
+	import { userCountry } from "../../GlobalStore";
 	import { onMount, createEventDispatcher } from "svelte";
 	import countries from "i18n-iso-countries";
+	import Select from "svelte-select";
 
-	const localCountry = localStorage.getItem("userCountry");
+	let localCountry: string;
 	const dispatch = createEventDispatcher();
 	let countryList = [];
-	let selectedCountry = "";
-	let filteredCountryList = [];
+	$: selectedCountry = "";
 	let searchText = "";
 
 	onMount(async () => {
 		const enLocaleData = await import("i18n-iso-countries/langs/en.json");
 		countries.registerLocale(enLocaleData.default);
 		countryList = Object.entries(countries.getNames("en")).map(([code, name]) => ({
-			code,
-			name,
+			value: code,
+			label: name,
 		}));
-		countryList.sort((a, b) => a.name.localeCompare(b.name));
-		filteredCountryList = countryList;
+		localCountry = localStorage.getItem("userCountry");
+		selectedCountry = localCountry;
 	});
 
 	const countryCodeToEmoji = (countryCode) => {
@@ -28,10 +28,6 @@
 			.split("")
 			.map((char) => char.charCodeAt(0) + OFFSET);
 		return String.fromCodePoint(...codePoints);
-	};
-
-	const handleChange = (event) => {
-		selectedCountry = event.target.value;
 	};
 
 	const handlePlay = () => {
@@ -47,29 +43,35 @@
 	}
 </script>
 
-<div class="card">
+<div class="container">
 	{#if selectedCountry}
 		<img
 			src={`https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/4x3/${selectedCountry.toLowerCase()}.svg`}
 			alt={getCountryName(selectedCountry)}
 			title={getCountryName(selectedCountry)}
 		/>
+	{:else}
+		<!-- <h1>Pick a country that you want to represent!</h1> -->
 	{/if}
 	<div class="search">
-		<select bind:value={selectedCountry} on:change={handleChange}>
-			<option value="">Select a country</option>
-			{#each countryList as country (country.code)}
-				<option value={country.code}>
-					<span class="name"> {country.name}</span>
-				</option>
-			{/each}
-		</select>
+		<Select
+			items={countryList}
+			placeholder="Select a country 🌎"
+			searchable={true}
+			clearable={false}
+			on:change={(e) => {
+				selectedCountry = e.detail.value;
+			}}
+			closeListOnChange={true}
+			inputAttributes={{ autocomplete: "on" }}
+			value={selectedCountry}
+		/>
 		<button on:click={handlePlay}>Play!</button>
 	</div>
 </div>
 
 <style>
-	.card {
+	.container {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -77,9 +79,11 @@
 		gap: 20px;
 		position: absolute;
 		bottom: 50%;
+		width: 1000px;
+		overflow: visible;
 	}
 
-	.card img {
+	.container img {
 		width: 150px;
 		border-radius: 15px;
 		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.4);
@@ -88,14 +92,18 @@
 	.search {
 		display: flex;
 		flex-direction: row;
+		color: black;
+		width: 400px;
+		gap: 10px;
+		max-width: 80vw;
 	}
 
 	button {
-		width: 100px;
+		font: "system-ui";
+		border-radius: 6px;
+		padding: 0 20px;
 		border: none;
 		cursor: pointer;
-	}
-	select {
-		width: 200px;
+		background: radial-gradient(circle at 10% -40%, #87e53a 0%, #08d334 90%);
 	}
 </style>

@@ -13,7 +13,6 @@
 	$: counterRef = null;
 
 	onMount(() => {
-		console.log(counterRef);
 		const handleConfetti = () => {
 			const rect = counterRef.getBoundingClientRect();
 			const originXLeft = rect.left / window.innerWidth; // Set originXLeft to be the left edge of the counter

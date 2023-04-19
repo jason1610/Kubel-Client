@@ -16,7 +16,6 @@
 		{ char: "⬜", hex: "#FFFFFF" }, // White
 	];
 	const empty = "⬛";
-
 	const randomEmoji = [
 		"😎",
 		"😎",
@@ -161,7 +160,8 @@
 		outline: 2px solid #319dff;
 		color: #319dff;
 		cursor: pointer;
-		transition: background-color, color 0.2s ease-in-out, transform 0.05s ease;
+		background-color: #319bff18;
+		transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, transform 0.05s ease;
 	}
 
 	button:hover {

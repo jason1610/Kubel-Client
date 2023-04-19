@@ -2,9 +2,9 @@
 	import { onMount } from "svelte";
 	import logo from "../../assets/logo.svg";
 	import help from "../../assets/help-icon.svg";
-	import { userCountry, changeCountry } from "../GlobalStore";
-	let country = localStorage.getItem("userCountry");
+	import { userCountry, changeCountry, showHelp } from "../../GlobalStore";
 
+	let country = localStorage.getItem("userCountry");
 	let pickCountry: boolean = false;
 </script>
 
@@ -28,7 +28,12 @@
 			/>
 		</button>
 	{/if}
-	<button class="help">
+	<button
+		class="help"
+		on:click={() => {
+			showHelp.set(true);
+		}}
+	>
 		<img src={help} alt="help" />
 	</button>
 </header>

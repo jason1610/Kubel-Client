@@ -1,9 +1,7 @@
 <script lang="ts">
 	export let mapData: MapData;
-
-	import type { MapData, Vector, Move, UserStats } from "../../Interfaces";
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-	import { onMount } from "svelte";
+
 	import {
 		moveCount,
 		isMoving,
@@ -14,20 +12,22 @@
 		showDashBoard,
 		selectedColor,
 	} from "./GameStore";
+	import type { MapData, Vector, Move, UserStats } from "../../Interfaces";
+	import { onMount } from "svelte";
 	import axios from "axios";
 	import dayjs from "dayjs";
 	import timezone from "dayjs/plugin/timezone";
 	import utc from "dayjs/plugin/utc";
 	import * as PIXI from "pixi.js";
 	import { gsap } from "gsap";
-	let app: PIXI.Application;
-	let canvas: HTMLCanvasElement;
 	dayjs.extend(utc);
 	dayjs.extend(timezone);
 
 	const canvasSize = 600;
 	const gap: number = 20;
 	let colorCount: number[];
+	let app: PIXI.Application;
+	let canvas: HTMLCanvasElement;
 	const pieceSpeed: number = 0.4;
 	let gridSize: number = mapData.pieceMap.length;
 	const cellSize: number = canvasSize / gridSize;
@@ -251,6 +251,33 @@
 		allowInput = true;
 	});
 
+	const animateSelectedPiece = (piece: any, color: string) => {
+		const targetBorderRadius = 50; // Set the target borderRadius value
+		const duration = 0.2; // Set the animation duration in seconds
+		gsap.to(piece, {
+			duration,
+			borderRadius: targetBorderRadius,
+			onUpdate: () => {
+				piece.clear();
+				piece.beginFill(lighterHex(color));
+				piece.drawRoundedRect(0, 0, pieceSize, pieceSize, piece.borderRadius);
+				const innerPieceSize = pieceSize * 0.8;
+				const innerPieceX = (pieceSize - innerPieceSize) / 2;
+				const innerPieceY = (pieceSize - innerPieceSize) / 2;
+				piece.beginFill(color);
+				piece.drawRoundedRect(
+					innerPieceX,
+					innerPieceY,
+					innerPieceSize,
+					innerPieceSize,
+					piece.borderRadius * 0.8
+				);
+				piece.endFill();
+				piece.endFill();
+			},
+		});
+	};
+
 	const onPointerDown = (id: string) => {
 		if (!allowInput) return;
 		isDragging = true;
@@ -265,7 +292,10 @@
 		selectedPos.y = piecePosition.y;
 		selectedPiece = id;
 		selectedColor.set(pieceMap[piecePosition.x][piecePosition.y].color);
-		// gsap.to(app.stage.getChildByName(id), { rotation: 27, x: 100, duration: 1 });
+		animateSelectedPiece(
+			app.stage.getChildByName(id),
+			pieceMap[piecePosition.x][piecePosition.y].color
+		);
 	};
 
 	const onPointerMove = (e: any) => {
@@ -342,8 +372,38 @@
 		}
 	};
 
+	const animateDeselectedPiece = (piece: any, color: string) => {
+		const targetBorderRadius = borderRadius; // Set the target borderRadius value
+		const duration = 0.2; // Set the animation duration in seconds
+		gsap.to(piece, {
+			duration,
+			borderRadius: targetBorderRadius,
+			onUpdate: () => {
+				piece.clear();
+				piece.beginFill(lighterHex(color));
+				piece.drawRoundedRect(0, 0, pieceSize, pieceSize, piece.borderRadius);
+				const innerPieceSize = pieceSize * 0.8;
+				const innerPieceX = (pieceSize - innerPieceSize) / 2;
+				const innerPieceY = (pieceSize - innerPieceSize) / 2;
+				piece.beginFill(color);
+				piece.drawRoundedRect(
+					innerPieceX,
+					innerPieceY,
+					innerPieceSize,
+					innerPieceSize,
+					piece.borderRadius * 0.8
+				);
+				piece.endFill();
+				piece.endFill();
+			},
+		});
+	};
+
 	const onPointerUp = () => {
 		if (!isDragging) return;
+		animateDeselectedPiece(app.stage.getChildByName(selectedPiece), $selectedColor);
+		console.log(selectedPiece);
+
 		selectedColor.set(null);
 		pieceMap = calculateNewPieceMap().map((row: any[]) => [...row]);
 		const selectedPieceNewPos = getIdPosition(selectedPiece);
@@ -365,8 +425,8 @@
 				const userStats = JSON.parse(localStorage.getItem("userStats"));
 				if (
 					userCountry !== null &&
-					userCountry !== "XX"
-					// (userStats == null || !userStats.dailyHistory.includes(moves.length))
+					userCountry !== "XX" &&
+					(userStats == null || !userStats.dailyHistory.includes(moves.length))
 				) {
 					axios.post(apiBaseUrl + "/win", { moves, iso: userCountry });
 				}
@@ -418,7 +478,7 @@
 		for (let x = 0; x < gridSize; x++) {
 			for (let y = 0; y < gridSize; y++) {
 				if (pieceMap[x][y] === null) continue;
-				const piece = new PIXI.Graphics();
+				const piece: any = new PIXI.Graphics();
 				piece.beginFill(lighterHex(pieceMap[x][y].color));
 				piece.drawRoundedRect(0, 0, pieceSize, pieceSize, borderRadius);
 				const innerPieceSize = pieceSize * 0.8;
@@ -432,6 +492,7 @@
 					innerPieceSize,
 					borderRadius * 0.8
 				);
+				piece.borderRadius = borderRadius;
 				piece.endFill();
 				piece.hitArea = new PIXI.Rectangle(
 					-gap / 2,
@@ -439,6 +500,7 @@
 					cellSize - gap / 4,
 					cellSize - gap / 4
 				);
+
 				// const hitAreaOutline = new PIXI.Graphics();
 				// hitAreaOutline.lineStyle(1, 0xff0000, 1); // Set the line style to be 2 pixels wide, red, and fully opaque
 				// hitAreaOutline.drawRect(-gap / 2, -gap / 2, cellSize - gap / 4, cellSize - gap / 4); // Draw the rectangle with the same dimensions as the hit area

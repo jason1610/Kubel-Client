@@ -8,14 +8,15 @@
 	dayjs.extend(utc);
 	dayjs.extend(timezone);
 
-	import Error from "./lib/Index/Error.svelte";
-	import Header from "./lib/Index/Header.svelte";
+	import Error from "./lib/Home/Error.svelte";
+	import Header from "./lib/Home/Header.svelte";
 	import Game from "./lib/Game/Game.svelte";
-	import Loading from "./lib/Index/Loading.svelte";
-	import { hasWon, showDashBoard } from "./lib/Game/GameStore";
-	import Background from "./lib/Index/Background.svelte";
-	import CountryPicker from "./lib/Index/CountryPicker.svelte";
-	import { changeCountry, userCountry } from "./lib/GlobalStore";
+	import Loading from "./lib/Home/Loading.svelte";
+	import { showDashBoard } from "./lib/Game/GameStore";
+	import Background from "./lib/Home/Background.svelte";
+	import CountryPicker from "./lib/Home/CountryPicker.svelte";
+	import { changeCountry, showHelp } from "./GlobalStore";
+	import Help from "./lib/Home/Help.svelte";
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	let loadingState: String = "Loading";
 	const version: number = 1;
@@ -88,6 +89,9 @@
 
 <main id="app">
 	<Header />
+	{#if $showHelp}
+		<Help />
+	{/if}
 	<div class="layout">
 		{#if loadingState === "Loading"}
 			<Loading />
