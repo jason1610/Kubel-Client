@@ -10,9 +10,9 @@
 
 <style>
 	button {
-		grid-row: 2;
+		grid-row: 2 / span 2;
 		grid-column: 1;
-		/* font-size: 15px; */
+		/* font-size: 25px; */
 		font-weight: 900;
 		text-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
 		color: white;
@@ -22,6 +22,7 @@
 		cursor: pointer;
 		transition: all 0.2s;
 		padding: 10px 0;
+		letter-spacing: 1.5px;
 	}
 
 	button:hover {

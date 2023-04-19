@@ -12,16 +12,16 @@
 	import Header from "./lib/Index/Header.svelte";
 	import Game from "./lib/Game/Game.svelte";
 	import Loading from "./lib/Index/Loading.svelte";
-	import { hasWon } from "./lib/Game/GameStore";
+	import { hasWon, showDashBoard } from "./lib/Game/GameStore";
 	import Background from "./lib/Index/Background.svelte";
 	import CountryPicker from "./lib/Index/CountryPicker.svelte";
-
+	import { changeCountry, userCountry } from "./lib/GlobalStore";
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	let loadingState: String = "Loading";
 	const version: number = 1;
 
 	import type { MapData } from "./Interfaces";
-	import Statistics from "./lib/Statistics/Statistics.svelte";
+	import DashBoard from "./lib/Statistics/DashBoard.svelte";
 	let dailyData: MapData;
 	let hasCountry = false;
 
@@ -92,13 +92,18 @@
 		{#if loadingState === "Loading"}
 			<Loading />
 		{:else if loadingState === "Loaded"}
-			{#if !hasCountry}
-				<CountryPicker on:play={() => (hasCountry = true)} />
+			{#if !hasCountry || $changeCountry}
+				<CountryPicker
+					on:play={() => {
+						hasCountry = true;
+						changeCountry.set(false);
+					}}
+				/>
 			{:else}
-				<Game mapData={dailyData} />
-			{/if}
-			{#if $hasWon}
-				<Statistics />
+				<Game mapData={JSON.parse(localStorage.getItem("dailyData"))} />
+				{#if $showDashBoard}
+					<DashBoard />
+				{/if}
 			{/if}
 		{:else if loadingState === "Error"}
 			<Error />
@@ -114,7 +119,6 @@
 		align-items: center;
 		justify-content: center;
 		align-items: center;
-		padding: 0 20px;
 		padding-bottom: 10vh;
 		/* flex-direction: column; */
 		/* background-color: red; */

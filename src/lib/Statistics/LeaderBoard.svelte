@@ -12,8 +12,6 @@
 		return countries.getName(isoCode, "en", { select: "official" });
 	}
 
-	const countryName = getCountryName("US");
-
 	$: {
 		groupedCountries = [];
 		for (let i = 0; i < leaderBoard.length; i++) {
@@ -27,15 +25,23 @@
 <div class="card">
 	<h2>Leader Board</h2>
 	<div class="board">
-		{#each groupedCountries as { score, countries }}
-			{#each countries as country}
+		{#each groupedCountries as { score, countries }, i}
+			{#each countries as country, j}
 				<div class="country">
-					<p>{score}</p>
 					<img
 						src={`https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/4x3/${country.toLowerCase()}.svg`}
 						alt={getCountryName(country)}
 						title={getCountryName(country)}
 					/>
+					{#if i === 0}
+						<p style="color:gold">{score}</p>
+					{:else if i === 1}
+						<p style="color:silver">{score}</p>
+					{:else if i === 2}
+						<p style="color:#CD7F32">{score}</p>
+					{:else}
+						<p>{score}</p>
+					{/if}
 				</div>
 			{/each}
 		{/each}
@@ -48,51 +54,45 @@
 		grid-row: 2 / span 4;
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
+		justify-content: flex-start;
 		gap: 10px;
+		/* padding-left: 0;
+		padding-right: 0; */
 	}
 
 	h2 {
-		/* font: var(--card-title-font); */
 		text-align: center;
+		font-size: 0.8rem;
 	}
 
 	.board {
-		border-radius: 0.6rem;
-		height: 100%;
 		overflow: scroll;
-		flex-direction: column;
 		display: grid;
 		gap: 10px;
+		width: 100%;
+		max-width: 150px;
+		overflow-x: hidden;
+		align-self: center;
 	}
 
 	.country {
-		height: 75px;
+		/* height: 75px; */
+		width: 100%;
 		display: flex;
-		overflow: hidden;
 		align-items: center;
-		border-radius: 10px;
-		position: relative;
+		flex-grow: 0;
+		flex-shrink: 1;
 	}
 
 	.country p {
-		font-size: 2rem;
-		text-align: right;
 		width: 100%;
-		padding: 15px;
-		/* font-family: "JURA", sans-serif; */
-		font-weight: 700;
-		color: rgb(160, 154, 160);
-		z-index: 5;
-		pointer-events: none;
+		color: #586a84;
+		text-align: center;
 	}
 
 	.country img {
-		position: absolute;
-		mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 95%);
-		-webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 95%);
-		width: 80%;
-		z-index: 4;
-		margin-left: -1px;
+		border-radius: 7px;
+		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+		width: 50px;
 	}
 </style>

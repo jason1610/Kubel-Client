@@ -2,7 +2,7 @@
 </script>
 
 <div class="card">
-	<h2>Welcome!</h2>
+	<h2>Good job!</h2>
 </div>
 
 <style>

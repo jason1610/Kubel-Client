@@ -9,7 +9,6 @@
 	let chart: Chart;
 
 	const myScore = JSON.parse(localStorage.getItem("dailyData")).moves.length;
-	console.log(myScore);
 
 	const getGradient = (ctx, chartArea) => {
 		let width, height, gradient;
@@ -71,14 +70,14 @@
 				return delay;
 			},
 		},
-		// layout: {
-		// 	padding: {
-		// 		top: 45,
-		// 		bottom: 10,
-		// 		left: 5,
-		// 		right: 15,
-		// 	},
-		// },
+		layout: {
+			// 	padding: {
+			// 		top: 45,
+			// 		bottom: 10,
+			// 		left: 5,
+			// 		right: 15,
+			// 	},
+		},
 		plugins: {
 			legend: {
 				display: false,
@@ -158,15 +157,23 @@
 </script>
 
 <div class="card">
-	<canvas bind:this={chartRef} />
+	<h2>Global Scores</h2>
+	<div class="container">
+		<canvas bind:this={chartRef} />
+	</div>
 </div>
 
 <style>
 	.card {
 		grid-row: 5 / span 2;
 		grid-column: 1 / span 4;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
 	}
-
+	.container {
+		overflow: hidden;
+	}
 	canvas {
 		width: 100%;
 		height: 100%;

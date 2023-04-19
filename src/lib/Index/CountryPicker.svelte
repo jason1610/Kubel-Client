@@ -1,7 +1,9 @@
 <script>
+	import { userCountry } from "../GlobalStore";
 	import { onMount, createEventDispatcher } from "svelte";
 	import countries from "i18n-iso-countries";
 
+	const localCountry = localStorage.getItem("userCountry");
 	const dispatch = createEventDispatcher();
 	let countryList = [];
 	let selectedCountry = "";
@@ -35,14 +37,23 @@
 	const handlePlay = () => {
 		if (selectedCountry) {
 			localStorage.setItem("userCountry", selectedCountry);
+			userCountry.set(selectedCountry);
 			dispatch("play", selectedCountry);
 		}
 	};
+
+	function getCountryName(isoCode) {
+		return countries.getName(isoCode, "en", { select: "official" });
+	}
 </script>
 
 <div class="card">
 	{#if selectedCountry}
-		<p class="flag">{countryCodeToEmoji(selectedCountry)}</p>
+		<img
+			src={`https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/4x3/${selectedCountry.toLowerCase()}.svg`}
+			alt={getCountryName(selectedCountry)}
+			title={getCountryName(selectedCountry)}
+		/>
 	{/if}
 	<div class="search">
 		<select bind:value={selectedCountry} on:change={handleChange}>
@@ -53,7 +64,6 @@
 				</option>
 			{/each}
 		</select>
-
 		<button on:click={handlePlay}>Play!</button>
 	</div>
 </div>
@@ -63,26 +73,29 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		background: rgba(20, 20, 30, 0.5);
-		background: linear-gradient(20deg, rgba(4, 4, 4, 0.5), rgba(24, 26, 32, 0.5));
-		border-radius: 10px;
-		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
-		padding: 20px;
+		align-items: center;
+		gap: 20px;
+		position: absolute;
+		bottom: 50%;
+	}
+
+	.card img {
+		width: 150px;
+		border-radius: 15px;
+		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.4);
 	}
 
 	.search {
 		display: flex;
 		flex-direction: row;
-		margin-bottom: 1rem;
 	}
 
-	.flag {
-		text-align: center;
-		font-size: 3rem;
-		margin-bottom: 1rem;
+	button {
+		width: 100px;
+		border: none;
+		cursor: pointer;
 	}
-	select option {
-		max-height: 10px; /* set the maximum height of the dropdown list */
-		overflow-y: auto; /* enable vertical scrolling if needed */
+	select {
+		width: 200px;
 	}
 </style>

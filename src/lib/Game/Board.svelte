@@ -4,12 +4,22 @@
 	import type { MapData, Vector, Move, UserStats } from "../../Interfaces";
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	import { onMount } from "svelte";
-	import { moveCount, isMoving, hasWon, restart, completedColors } from "./GameStore";
+	import {
+		moveCount,
+		isMoving,
+		hasWon,
+		restart,
+		completedColors,
+		newWin,
+		showDashBoard,
+		selectedColor,
+	} from "./GameStore";
 	import axios from "axios";
 	import dayjs from "dayjs";
 	import timezone from "dayjs/plugin/timezone";
 	import utc from "dayjs/plugin/utc";
 	import * as PIXI from "pixi.js";
+	import { gsap } from "gsap";
 	let app: PIXI.Application;
 	let canvas: HTMLCanvasElement;
 	dayjs.extend(utc);
@@ -34,6 +44,7 @@
 	let lockedAxis: "x" | "y" | null = null;
 	let offsetDelta: Vector = { x: 0, y: 0 };
 	let selectedPos: Vector = { x: 0, y: 0 };
+	let pieceOffset: Vector = { x: 0, y: 0 };
 
 	const getDisplayedCellSize = () => {
 		const currentCanvasWidth = canvas.clientWidth;
@@ -228,6 +239,8 @@
 		}
 		moveCount.set(0);
 		hasWon.set(false);
+		newWin.set(true);
+		showDashBoard.set(false);
 		completedColors.set(new Array(colorCount.length).fill(false));
 		restart.set(false);
 		const defaultMapData = JSON.parse(JSON.stringify(mapData));
@@ -251,6 +264,8 @@
 		selectedPos.x = piecePosition.x;
 		selectedPos.y = piecePosition.y;
 		selectedPiece = id;
+		selectedColor.set(pieceMap[piecePosition.x][piecePosition.y].color);
+		// gsap.to(app.stage.getChildByName(id), { rotation: 27, x: 100, duration: 1 });
 	};
 
 	const onPointerMove = (e: any) => {
@@ -272,6 +287,10 @@
 		if (offset.x === lastOffset.x && offset.y === lastOffset.y) return;
 		offsetDelta.x = offset.x - lastOffset.x;
 		offsetDelta.y = offset.y - lastOffset.y;
+		pieceOffset = {
+			x: offset.x * displayedCellSize,
+			y: offset.y * displayedCellSize,
+		};
 		lastOffset = { x: offset.x, y: offset.y };
 	};
 
@@ -325,6 +344,7 @@
 
 	const onPointerUp = () => {
 		if (!isDragging) return;
+		selectedColor.set(null);
 		pieceMap = calculateNewPieceMap().map((row: any[]) => [...row]);
 		const selectedPieceNewPos = getIdPosition(selectedPiece);
 		if (
@@ -418,6 +438,7 @@
 				piece.endFill();
 				piece.name = pieceMap[x][y].id;
 				piece.eventMode = "static";
+
 				piece.on("pointerdown", (e) => {
 					onPointerDown(piece.name);
 				});
@@ -433,6 +454,7 @@
 			onPointerUp();
 		});
 		if (checkForWin()) {
+			newWin.set(false);
 			hasWon.set(true);
 			allowInput = false;
 		} else allowInput = true;
@@ -445,8 +467,8 @@
 
 <style>
 	.board {
-		/* max-width: min(600px, 90vw); */
 		width: 550px;
+		max-width: 90vw;
 		aspect-ratio: 1/1;
 		display: flex;
 		align-items: center;

@@ -185,7 +185,7 @@
 
 <div class="card">
 	<h2>My History</h2>
-	<div class="chart-container">
+	<div class="container">
 		<canvas bind:this={chartRef} />
 	</div>
 </div>
@@ -199,14 +199,8 @@
 		gap: 10px;
 	}
 
-	h2 {
-		font: var(--card-title-font);
-		text-align: center;
-	}
-
-	.chart-container {
-		width: 100%;
-		height: 100%;
+	.container {
+		overflow: hidden;
 	}
 	canvas {
 		width: 100%;

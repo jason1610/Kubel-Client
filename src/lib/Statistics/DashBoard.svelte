@@ -16,7 +16,6 @@
 	let leaderBoard: any = null;
 
 	onMount(() => {
-		console.log("LETS GOOOO");
 		axios
 			.get(apiBaseUrl + "/statistics")
 			.then((res) => {
@@ -24,9 +23,6 @@
 					dailyStats = res.data;
 					globalScores = dailyStats.globalScores;
 					leaderBoard = dailyStats.leaderBoard;
-					console.log(dailyStats);
-				} else {
-					console.log("Error");
 				}
 			})
 			.catch((err) => {
@@ -35,7 +31,7 @@
 	});
 </script>
 
-<div class="satistics-container">
+<div class="dashboard-container">
 	{#if !dailyStats}
 		<h1>Loading...</h1>
 	{:else}
@@ -50,7 +46,7 @@
 </div>
 
 <style>
-	.satistics-container {
+	.dashboard-container {
 		align-self: center;
 		display: grid;
 		grid-template-columns: repeat(5, 1fr);
@@ -59,7 +55,7 @@
 		background: #161b21;
 		padding: 20px;
 		border-radius: 10px;
-		max-width: 95vw;
+		max-width: 90vw;
 		box-sizing: border-box;
 		width: 700px;
 		height: 525px;
@@ -96,10 +92,10 @@
 	}
 
 	@media (orientation: portrait), (max-width: 1400px) {
-		.satistics-container {
+		.dashboard-container {
 			display: flex;
 			flex-direction: column;
-			max-width: 100vw; /* set max width to full viewport width */
+			/* max-width: 100vw; set max width to full viewport width */
 			height: auto; /* let height adjust to content */
 		}
 	}
