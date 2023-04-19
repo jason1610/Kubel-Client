@@ -433,7 +433,17 @@
 					borderRadius * 0.8
 				);
 				piece.endFill();
-				piece.hitArea = new PIXI.Rectangle(0, 0, cellSize, cellSize);
+				piece.hitArea = new PIXI.Rectangle(
+					-gap / 2,
+					-gap / 2,
+					cellSize - gap / 4,
+					cellSize - gap / 4
+				);
+				// const hitAreaOutline = new PIXI.Graphics();
+				// hitAreaOutline.lineStyle(1, 0xff0000, 1); // Set the line style to be 2 pixels wide, red, and fully opaque
+				// hitAreaOutline.drawRect(-gap / 2, -gap / 2, cellSize - gap / 4, cellSize - gap / 4); // Draw the rectangle with the same dimensions as the hit area
+				// piece.addChild(hitAreaOutline); // Add the hitAreaOutline as a child of the piece
+
 				piece.position.set(x * gap + x * pieceSize + gap, y * gap + y * pieceSize + gap);
 				piece.endFill();
 				piece.name = pieceMap[x][y].id;

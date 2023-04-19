@@ -12,10 +12,10 @@
 		{ char: "🟦", hex: "#0000FF" }, // Blue
 		{ char: "🟪", hex: "#800080" }, // Purple
 		{ char: "🟫", hex: "#A52A2A" }, // Brown
-		{ char: "⬛", hex: "#000000" }, // Black
+		// { char: "⬛", hex: "#000000" }, // Black
 		{ char: "⬜", hex: "#FFFFFF" }, // White
 	];
-	const empty = "⚫";
+	const empty = "⬛";
 
 	const randomEmoji = [
 		"😎",

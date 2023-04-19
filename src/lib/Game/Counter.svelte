@@ -47,6 +47,7 @@
 				if ($newWin) {
 					handleConfetti();
 					setTimeout(() => {
+						newWin.set(false);
 						showDashBoard.set(true);
 					}, 1500);
 				} else {
