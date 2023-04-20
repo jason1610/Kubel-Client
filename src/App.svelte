@@ -26,41 +26,61 @@
 	let dailyData: MapData;
 	let hasCountry = false;
 
+	const isLocalDataValid = (data: any) => {
+		let localDailyData: any = localStorage.getItem("dailyData");
+		if (localDailyData === null) return false;
+		localDailyData = JSON.parse(localDailyData);
+		if (localDailyData.version !== data.version) return false;
+		// if (localDailyData.pieceMap.length !== data.pieceMap.length) return false;
+		// if (localDailyData.pieceMap[0].length !== data.pieceMap[0].length) return false;
+		// for (let x = 0; x < data.pieceMap.length; x++) {
+		// 	for (let y = 0; y < data.pieceMap[x].length; y++) {
+		// 		if (
+		// 			(data.pieceMap[x][y] === 0 && localDailyData.pieceMap[x][y] !== null) ||
+		// 			(data.pieceMap[x][y] !== 0 && localDailyData.pieceMap[x][y] === null)
+		// 		) {
+		// 			return false;
+		// 		}
+		// 	}
+		// }
+		return true;
+	};
+
 	const setDailyData = (data: any) => {
+		localStorage.removeItem("dailyData");
 		dailyData = data;
-		for (let x = 0; x < dailyData.pieceMap.length; x++) {
-			for (let y = 0; y < dailyData.pieceMap[x].length; y++) {
+		for (let x = 0; x < data.pieceMap.length; x++) {
+			for (let y = 0; y < data.pieceMap[x].length; y++) {
 				if (data.pieceMap[x][y] === 0) {
-					dailyData.pieceMap[x][y] = null;
+					data.pieceMap[x][y] = null;
 				} else {
 					const id: string = `${x}-${y}`;
-					const obj = { id, color: dailyData.palette[data.pieceMap[x][y] - 1] };
-					dailyData.pieceMap[x][y] = obj;
+					const obj = { id, color: data.palette[data.pieceMap[x][y] - 1] };
+					data.pieceMap[x][y] = obj;
 				}
 			}
 		}
+
 		dailyData.moves = [];
+		console.log(dailyData);
 		localStorage.setItem("dailyData", JSON.stringify(dailyData));
 	};
 
 	const fetchDailyData = () => {
-		let data: any = localStorage.getItem("dailyData");
-		if (data) {
-			data = JSON.parse(data);
-			const currentDate: String = dayjs().tz("Etc/GMT-2").format("YYYYMMDD");
-			if (data.version && data.version === version && data.seed === currentDate) {
-				dailyData = data;
-				loadingState = "Loaded";
-				return;
-			} else {
-				localStorage.removeItem("dailyData");
-			}
-		}
 		axios
 			.get(apiBaseUrl + "/daily")
 			.then((res) => {
 				if (res.status === 200) {
-					setDailyData(res.data);
+					if (!isLocalDataValid(res.data)) {
+						setDailyData(res.data);
+						let userStatsString = localStorage.getItem("userStats");
+						let userStats: any;
+						if (userStatsString) {
+							userStats = JSON.parse(userStatsString);
+							userStats.dailyHistory = [];
+							localStorage.setItem("userStats", JSON.stringify(userStats));
+						}
+					}
 					loadingState = "Loaded";
 				} else {
 					loadingState = "Error";

@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { userCountry } from "../../GlobalStore";
 	import { onMount, createEventDispatcher } from "svelte";
+	import { userCountry } from "../../GlobalStore";
 	import countries from "i18n-iso-countries";
 	import Select from "svelte-select";
 
-	let localCountry: string;
 	const dispatch = createEventDispatcher();
-	let countryList = [];
+	let localCountry: string;
 	$: selectedCountry = "";
-	let searchText = "";
+	let countryList = [];
 
 	onMount(async () => {
 		const enLocaleData = await import("i18n-iso-countries/langs/en.json");

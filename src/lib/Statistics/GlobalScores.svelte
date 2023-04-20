@@ -71,12 +71,9 @@
 			},
 		},
 		layout: {
-			// 	padding: {
-			// 		top: 45,
-			// 		bottom: 10,
-			// 		left: 5,
-			// 		right: 15,
-			// 	},
+			padding: {
+				top: 45,
+			},
 		},
 		plugins: {
 			legend: {
@@ -130,6 +127,7 @@
 				beginAtZero: false,
 				ticks: {
 					autoSkip: false,
+					precision: 0,
 					maxTicksLimit: 5,
 					maxRotation: 0,
 					color: "rgba(255, 255, 255, 0.25)",
@@ -171,7 +169,13 @@
 		flex-direction: column;
 		gap: 10px;
 	}
+	.card h2 {
+		position: absolute;
+	}
 	.container {
+		z-index: 1;
+		height: 100%;
+		width: 100%;
 		overflow: hidden;
 	}
 	canvas {

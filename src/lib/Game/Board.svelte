@@ -1,7 +1,6 @@
 <script lang="ts">
 	export let mapData: MapData;
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
 	import {
 		moveCount,
 		isMoving,
@@ -12,16 +11,18 @@
 		showDashBoard,
 		selectedColor,
 	} from "./GameStore";
+
 	import type { MapData, Vector, Move, UserStats } from "../../Interfaces";
-	import { onMount } from "svelte";
-	import axios from "axios";
-	import dayjs from "dayjs";
+	import FingerprintJS from "@fingerprintjs/fingerprintjs";
 	import timezone from "dayjs/plugin/timezone";
 	import utc from "dayjs/plugin/utc";
+	import { onMount } from "svelte";
 	import * as PIXI from "pixi.js";
 	import { gsap } from "gsap";
-	dayjs.extend(utc);
+	import dayjs from "dayjs";
+	import axios from "axios";
 	dayjs.extend(timezone);
+	dayjs.extend(utc);
 
 	const canvasSize = 600;
 	const gap: number = 20;
@@ -350,11 +351,11 @@
 					userStats.scoreHistory.shift();
 				}
 			if (
-				moveCount < userStats.highScore ||
+				moveCount < userStats.dailyHighScore ||
 				userStats.today !== todaySeed ||
-				!userStats.highScore
+				!userStats.dailyHighScore
 			) {
-				userStats.highScore = $moveCount;
+				userStats.dailyHighScore = $moveCount;
 			}
 			if (userStats.lastWin === yesterdaySeed) {
 				userStats.winStreak += 1;
@@ -399,6 +400,18 @@
 		});
 	};
 
+	async function sendWin(moves, iso) {
+		try {
+			const fpPromise = FingerprintJS.load();
+			const fp = await fpPromise;
+			const result = await fp.get();
+			const userFingerprint = result.visitorId;
+			axios.post(apiBaseUrl + "/win", { moves, iso, id: userFingerprint });
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
 	const onPointerUp = () => {
 		if (!isDragging) return;
 		animateDeselectedPiece(app.stage.getChildByName(selectedPiece), $selectedColor);
@@ -428,7 +441,7 @@
 					userCountry !== "XX" &&
 					(userStats == null || !userStats.dailyHistory.includes(moves.length))
 				) {
-					axios.post(apiBaseUrl + "/win", { moves, iso: userCountry });
+					sendWin(moves, userCountry);
 				}
 				saveData();
 			} else allowInput = true;

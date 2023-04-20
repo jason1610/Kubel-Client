@@ -9,6 +9,7 @@
 	import CountDown from "./CountDown.svelte";
 	import Share from "./Share.svelte";
 	import Title from "./Title.svelte";
+	import loadingIcon from "../../assets/loading-icon.gif";
 
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	let dailyStats: any = null;
@@ -33,7 +34,7 @@
 
 <div class="dashboard-container">
 	{#if !dailyStats}
-		<h1>Loading...</h1>
+		<img src={loadingIcon} alt="Loading" />
 	{:else}
 		<Title />
 		<GlobalScores {globalScores} />
@@ -46,7 +47,18 @@
 </div>
 
 <style>
+	.dashboard-container img {
+		width: 60px;
+		aspect-ratio: 1;
+		animation: loader-spawn 1s ease;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+
 	.dashboard-container {
+		position: relative;
 		align-self: center;
 		display: grid;
 		grid-template-columns: repeat(5, 1fr);
@@ -76,6 +88,7 @@
 	}
 
 	:global(.card) {
+		position: relative;
 		background: #1d232c;
 		border-radius: 10px;
 		box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.3);

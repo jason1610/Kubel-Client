@@ -91,12 +91,9 @@
 			includeInivisible: false,
 		},
 		layout: {
-			// padding: {
-			// 	top: 20,
-			// 	bottom: 10,
-			// 	left: 5,
-			// 	right: 15,
-			// },
+			padding: {
+				top: 45,
+			},
 		},
 		plugins: {
 			legend: {
@@ -158,6 +155,7 @@
 				ticks: {
 					autoSkip: false,
 					maxTicksLimit: 5,
+					precision: 0,
 					maxRotation: 0,
 					color: "#3B4758",
 					font: {
@@ -184,7 +182,7 @@
 </script>
 
 <div class="card">
-	<h2>My History</h2>
+	<h2>My Stats</h2>
 	<div class="container">
 		<canvas bind:this={chartRef} />
 	</div>
@@ -199,8 +197,14 @@
 		gap: 10px;
 	}
 
+	.card h2 {
+		position: absolute;
+	}
+
 	.container {
 		overflow: hidden;
+		width: 100%;
+		height: 100%;
 	}
 	canvas {
 		width: 100%;

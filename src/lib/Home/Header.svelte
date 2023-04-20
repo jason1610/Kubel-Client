@@ -3,9 +3,32 @@
 	import logo from "../../assets/logo.svg";
 	import help from "../../assets/help-icon.svg";
 	import { userCountry, changeCountry, showHelp } from "../../GlobalStore";
+	import { hasWon } from "../../lib/Game/GameStore";
 
 	let country = localStorage.getItem("userCountry");
-	let pickCountry: boolean = false;
+	let hasPlayedToday: boolean = false;
+
+	const checkIfPlayed = () => {
+		let userStats: any = localStorage.getItem("userStats");
+		if (userStats) {
+			userStats = JSON.parse(userStats);
+			if (userStats.dailyHistory.length > 0) {
+				hasPlayedToday = true;
+			}
+		}
+	};
+
+	onMount(() => {
+		const unsubscribe = hasWon.subscribe((value) => {
+			if (value) {
+				hasPlayedToday = true;
+			}
+		});
+		checkIfPlayed();
+		return () => {
+			unsubscribe();
+		};
+	});
 </script>
 
 <header>
@@ -14,14 +37,14 @@
 		<h1>KUBEL.io</h1>
 	</div>
 	{#if $userCountry}
-		<button class="flag" on:click={() => changeCountry.set(true)}>
+		<button class="flag" disabled={hasPlayedToday} on:click={() => changeCountry.set(true)}>
 			<img
 				src={`https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/4x3/${$userCountry.toLowerCase()}.svg`}
 				alt="flag"
 			/>
 		</button>
 	{:else if country}
-		<button class="flag" on:click={() => changeCountry.set(true)}>
+		<button class="flag" disabled={hasPlayedToday} on:click={() => changeCountry.set(true)}>
 			<img
 				src={`https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/4x3/${country.toLowerCase()}.svg`}
 				alt="flag"
@@ -91,7 +114,12 @@
 	.flag:hover img {
 		opacity: 1;
 	}
-
+	.flag:disabled:hover img {
+		opacity: 0.75;
+	}
+	.flag:disabled:hover {
+		cursor: default;
+	}
 	.help {
 		margin-left: 20px;
 		background: none;
