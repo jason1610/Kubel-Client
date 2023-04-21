@@ -62,7 +62,7 @@
 
 	h2 {
 		text-align: center;
-		font-size: 0.8rem;
+		/* font-size: 0.8rem; */
 	}
 
 	.board {
@@ -73,6 +73,23 @@
 		max-width: 150px;
 		overflow-x: hidden;
 		align-self: center;
+		scrollbar-width: thin;
+		scrollbar-color: #586a84 #586a8400;
+	}
+
+	.board::-webkit-scrollbar {
+		width: 4px;
+	}
+	.board ::-webkit-scrollbar-track {
+		background: #586a8400;
+	}
+	.board::-webkit-scrollbar-thumb {
+		background-color: #586a84;
+		border-radius: 20px;
+		border: 4px solid #586a8400;
+	}
+	.board::-webkit-scrollbar-thumb:hover {
+		background-color: #6f84a0;
 	}
 
 	.country {

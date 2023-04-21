@@ -106,6 +106,7 @@
 		justify-content: center;
 	}
 	.flag img {
+		width: 100%;
 		border-radius: 4px;
 		opacity: 0.75;
 		transition: opacity 0.2s ease;

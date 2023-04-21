@@ -3,7 +3,7 @@
 	import { userCountry } from "../../GlobalStore";
 	import countries from "i18n-iso-countries";
 	import Select from "svelte-select";
-
+	import spinningEarth from "../../assets/spinning-earth.gif";
 	const dispatch = createEventDispatcher();
 	let localCountry: string;
 	$: selectedCountry = "";
@@ -45,17 +45,18 @@
 <div class="container">
 	{#if selectedCountry}
 		<img
+			class="flag"
 			src={`https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/4x3/${selectedCountry.toLowerCase()}.svg`}
 			alt={getCountryName(selectedCountry)}
 			title={getCountryName(selectedCountry)}
 		/>
 	{:else}
-		<!-- <h1>Pick a country that you want to represent!</h1> -->
+		<img class="earth" src={spinningEarth} alt="" />
 	{/if}
 	<div class="search">
 		<Select
 			items={countryList}
-			placeholder="Select a country 🌎"
+			placeholder="Pick a country 🌎"
 			searchable={true}
 			clearable={false}
 			on:change={(e) => {
@@ -76,16 +77,16 @@
 		justify-content: center;
 		align-items: center;
 		gap: 20px;
-		position: absolute;
-		bottom: 50%;
-		width: 1000px;
-		overflow: visible;
 	}
 
-	.container img {
+	.container .flag {
 		width: 150px;
 		border-radius: 15px;
 		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.4);
+	}
+
+	.container .earth {
+		width: 150px;
 	}
 
 	.search {

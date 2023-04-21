@@ -415,8 +415,6 @@
 	const onPointerUp = () => {
 		if (!isDragging) return;
 		animateDeselectedPiece(app.stage.getChildByName(selectedPiece), $selectedColor);
-		console.log(selectedPiece);
-
 		selectedColor.set(null);
 		pieceMap = calculateNewPieceMap().map((row: any[]) => [...row]);
 		const selectedPieceNewPos = getIdPosition(selectedPiece);
@@ -475,7 +473,10 @@
 		const newR = Math.min(255, r + lighten);
 		const newG = Math.min(255, g + lighten);
 		const newB = Math.min(255, b + lighten);
-		return `#${newR.toString(16)}${newG.toString(16)}${newB.toString(16)}`;
+		const newRHex = newR.toString(16).padStart(2, "0");
+		const newGHex = newG.toString(16).padStart(2, "0");
+		const newBHex = newB.toString(16).padStart(2, "0");
+		return `#${newRHex}${newGHex}${newBHex}`;
 	};
 
 	onMount(() => {

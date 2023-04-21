@@ -101,7 +101,7 @@
 		text-align: left;
 		font-size: 0.9rem;
 		font-weight: 500;
-		text-transform: uppercase;
+		/* text-transform: uppercase; */
 	}
 
 	@media (orientation: portrait), (max-width: 1400px) {

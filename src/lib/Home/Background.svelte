@@ -4,6 +4,7 @@
 	import { palette, completedColors } from "../Game/GameStore";
 	const noise3D = createNoise3D();
 
+	let isSafari: boolean = false;
 	let miniCanvas: HTMLCanvasElement = document.createElement("canvas");
 	const miniCtx: CanvasRenderingContext2D = miniCanvas.getContext("2d");
 	const miniSize: number = 50;
@@ -112,6 +113,10 @@
 	};
 
 	onMount(() => {
+		const userAgent = window.navigator.userAgent.toLowerCase();
+		if (userAgent.indexOf("safari") !== -1 && userAgent.indexOf("chrome") === -1) {
+			isSafari = true;
+		}
 		ctx = canvas.getContext("2d");
 		updateCanvasSize();
 		animate();
@@ -132,20 +137,49 @@
 	});
 </script>
 
-<canvas bind:this={canvas} width={canvasWidth} height={canvasHeight} />
+<div class="container" style={isSafari ? "filter: blur(20px)" : ""}>
+	<canvas bind:this={canvas} width={canvasWidth} height={canvasHeight} />
+</div>
 
 <style>
-	canvas {
-		z-index: -100;
+	.container {
+		/* z-index: -1; */
+		/* background-color: #090909; */
+		/* position: fixed;
+		height: 100vh;
+		height: 100lvh;
+		width: 100vw; */
+		/* opacity: 1; */
+		/* overflow: hidden; */
+		/* position: fixed; */
+		/* -webkit-transform: translate3d(0, 0, 0); */
 		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		height: 100lvh;
+		overflow: hidden;
+		background-color: rgb(0, 0, 0);
+		z-index: -1;
+	}
+	canvas {
+		position: absolute;
+		z-index: -1;
 		top: -125px;
 		left: -125px;
-		display: block;
-		background-color: red;
 		height: calc(100vh + 250px);
 		height: calc(100lvh + 250px);
 		width: calc(100vw + 250px);
-		animation: background-spawn 4s ease;
+		animation: background-spawn 4s ease forwards;
+		/* animation: background-spawn 4s ease forwards;
+		position: fixed;
+		-webkit-transform: translateZ(1px);
+		-moz-transform: translateZ(1px);
+		-o-transform: translateZ(1px);
+		transform: translateZ(1px);
+		z-index: 10;
+		overflow: hidden; */
 	}
 	@keyframes background-spawn {
 		0% {

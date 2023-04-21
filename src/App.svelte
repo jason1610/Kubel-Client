@@ -62,7 +62,6 @@
 		}
 
 		dailyData.moves = [];
-		console.log(dailyData);
 		localStorage.setItem("dailyData", JSON.stringify(dailyData));
 	};
 
@@ -144,8 +143,8 @@
 		justify-content: center;
 		align-items: center;
 		padding-bottom: 10vh;
-		/* flex-direction: column; */
-		/* background-color: red; */
+		min-height: 75vh;
+		min-height: 75lvh;
 	}
 	@media (orientation: portrait), (max-width: 1400px) {
 		.layout {

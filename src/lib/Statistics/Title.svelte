@@ -2,7 +2,7 @@
 </script>
 
 <div class="card">
-	<h2>Victory!</h2>
+	<h1>🎉 Victory! 🎉</h1>
 </div>
 
 <style>
@@ -14,7 +14,9 @@
 		align-items: center;
 	}
 
-	.card h2 {
+	.card h1 {
 		text-align: center;
+		font-size: 1.4rem;
+		font-weight: 600;
 	}
 </style>
