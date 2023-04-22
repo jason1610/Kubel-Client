@@ -45,7 +45,7 @@
 	let lockedAxis: "x" | "y" | null = null;
 	let offsetDelta: Vector = { x: 0, y: 0 };
 	let selectedPos: Vector = { x: 0, y: 0 };
-	let pieceOffset: Vector = { x: 0, y: 0 };
+	let pixelOffsetDelta: Vector = { x: 0, y: 0 };
 
 	const getDisplayedCellSize = () => {
 		const currentCanvasWidth = canvas.clientWidth;
@@ -253,7 +253,7 @@
 	});
 
 	const animateSelectedPiece = (piece: any, color: string) => {
-		const targetBorderRadius = 50; // Set the target borderRadius value
+		const targetBorderRadius = pieceSize / 2; // Set the target borderRadius value
 		const duration = 0.2; // Set the animation duration in seconds
 		gsap.to(piece, {
 			duration,
@@ -315,13 +315,21 @@
 			offset.x = 0;
 			offset.y = gridOffsetY;
 		}
+
+		const cellIndexX = Math.floor(dx / displayedCellSize);
+		const cellIndexY = Math.floor(dy / displayedCellSize);
+		const currentCellCenterX = cellIndexX * displayedCellSize + displayedCellSize / 2;
+		const currentCellCenterY = cellIndexY * displayedCellSize + displayedCellSize / 2;
+		const offsetX = e.clientX - currentCellCenterX;
+		const offsetY = e.clientY - currentCellCenterY;
+		pixelOffsetDelta = {
+			x: offsetX,
+			y: offsetY,
+		};
+		console.log(pixelOffsetDelta);
 		if (offset.x === lastOffset.x && offset.y === lastOffset.y) return;
 		offsetDelta.x = offset.x - lastOffset.x;
 		offsetDelta.y = offset.y - lastOffset.y;
-		pieceOffset = {
-			x: offset.x * displayedCellSize,
-			y: offset.y * displayedCellSize,
-		};
 		lastOffset = { x: offset.x, y: offset.y };
 	};
 
