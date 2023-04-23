@@ -29,7 +29,7 @@
 	let colorCount: number[];
 	let app: PIXI.Application;
 	let canvas: HTMLCanvasElement;
-	const pieceSpeed: number = 0.4;
+	const pieceSpeed: number = 0.25;
 	let gridSize: number = mapData.pieceMap.length;
 	const cellSize: number = canvasSize / gridSize;
 	const borderRadius: number = cellSize / 7;
@@ -46,6 +46,7 @@
 	let offsetDelta: Vector = { x: 0, y: 0 };
 	let selectedPos: Vector = { x: 0, y: 0 };
 	let pixelOffsetDelta: Vector = { x: 0, y: 0 };
+	let lastPieceMap: any = pieceMap.map((row: any[]) => [...row]);
 
 	const getDisplayedCellSize = () => {
 		const currentCanvasWidth = canvas.clientWidth;
@@ -114,43 +115,74 @@
 		return newPieceMap;
 	};
 
-	const lerpPos = (start: number, end: number) => {
-		return start + (end - start) * pieceSpeed;
+	const easeInOutQuad = (t: number) => {
+		return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 	};
+
+	const lerpPos = (start: number, end: number) => {
+		const easedT = easeInOutQuad(pieceSpeed);
+		return start + (end - start) * easedT;
+	};
+
 	const lerpSize = (start: number, end: number) => {
 		return start + (end - start) * pieceSpeed * 2;
 	};
 
 	const animate = () => {
 		const newPieceMap = calculateNewPieceMap();
+
 		for (let x = 0; x < gridSize; x++) {
 			for (let y = 0; y < gridSize; y++) {
 				if (pieceMap[x][y] === null) continue;
 				const piece = app.stage.getChildByName(newPieceMap[x][y].id);
-				const newPos = {
+				let newPos = {
 					x: x * gap + x * pieceSize + gap,
 					y: y * gap + y * pieceSize + gap,
 				};
+				if (offset.x === 0 && offset.y === 0) {
+					if (x === selectedPos.x && y === selectedPos.y) {
+						newPos.x += pixelOffsetDelta.x * 0.4;
+						newPos.y += pixelOffsetDelta.y * 0.4;
+					}
+				} else {
+					if (y === selectedPos.y && lockedAxis === "x") {
+						newPos.x += pixelOffsetDelta.x * 0.4;
+					}
+					if (x === selectedPos.x && lockedAxis === "y") {
+						newPos.y += pixelOffsetDelta.y * 0.4;
+					}
+				}
+
 				piece.position.set(
 					lerpPos(piece.position.x, newPos.x),
 					lerpPos(piece.position.y, newPos.y)
 				);
 				//get offset between old and new position
+				const oldPostion = getIdPosition(lastPieceMap[x][y].id);
 				const pieceOffset = {
-					x: newPos.x - piece.position.x,
-					y: newPos.y - piece.position.y,
+					x: x - oldPostion.x,
+					y: y - oldPostion.y,
 				};
+				const isWrappingX: boolean = Math.sign(pieceOffset.x) !== Math.sign(offsetDelta.x);
+				const isWrappingY: boolean = Math.sign(pieceOffset.y) !== Math.sign(offsetDelta.y);
 
-				if (
-					(pieceOffset.x !== 0 && Math.sign(pieceOffset.x) !== offsetDelta.x) ||
-					(pieceOffset.y !== 0 && Math.sign(pieceOffset.y) !== offsetDelta.y)
-				) {
-					piece.zIndex = 10;
-					// piece.scale.set(0.3);
-				} else {
-					piece.scale.set(1);
-					piece.zIndex = 0;
-				}
+				// if (offset.x !== 0 && y === selectedPos.y && isWrappingX) {
+				// 	piece.scale.set(0.5);
+				// } else {
+				// 	piece.scale.set(1);
+				// }
+
+				// if (
+				// 	(offset.x !== 0 || offset.y !== 0) &&
+				// 	(x === selectedPos.x || y === selectedPos.y) &&
+				// 	(isWrappingX || isWrappingY)
+				// ) {
+				// 	piece.zIndex = 10;
+				// 	piece.scale.set(0.3);
+				// } else {
+				// 	piece.scale.set(1);
+				// 	piece.zIndex = 0;
+				// }
 			}
 		}
 	};
@@ -315,16 +347,22 @@
 			offset.x = 0;
 			offset.y = gridOffsetY;
 		}
-
 		pixelOffsetDelta = {
-			x: Math.abs((dx + (Math.sign(dx) * displayedCellSize) / 2) % displayedCellSize),
-			y: Math.abs((dy + displayedCellSize / 2) % displayedCellSize) - displayedCellSize / 2,
+			x:
+				(((Math.abs(dx) + displayedCellSize / 2) % displayedCellSize) -
+					displayedCellSize / 2) *
+				(dx === 0 ? 1 : Math.sign(dx)),
+			y:
+				(((Math.abs(dy) + displayedCellSize / 2) % displayedCellSize) -
+					displayedCellSize / 2) *
+				(dy === 0 ? 1 : Math.sign(dy)),
 		};
-		// console.log(pixelOffsetDelta);
+
 		if (offset.x === lastOffset.x && offset.y === lastOffset.y) return;
 		offsetDelta.x = offset.x - lastOffset.x;
 		offsetDelta.y = offset.y - lastOffset.y;
 		lastOffset = { x: offset.x, y: offset.y };
+		lastPieceMap = pieceMap.map((row: any[]) => [...row]);
 	};
 
 	const saveData = () => {
@@ -450,6 +488,7 @@
 		isDragging = false;
 		dragStart = { x: 0, y: 0 };
 		offset = { x: 0, y: 0 };
+		pixelOffsetDelta = { x: 0, y: 0 };
 		lockedAxis = null;
 	};
 
