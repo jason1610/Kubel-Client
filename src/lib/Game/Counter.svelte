@@ -81,8 +81,8 @@
 		justify-content: center;
 		background: rgb(240, 236, 236);
 		background: linear-gradient(to bottom, rgb(255, 255, 255), rgb(205, 194, 194));
-		min-width: 75px;
-		height: 75px;
+		min-width: 50px;
+		height: 50px;
 		border-radius: 20px;
 		margin-bottom: 50px;
 		padding: 10px;
@@ -109,7 +109,7 @@
 	}
 
 	.counter p {
-		font-size: 56px;
+		font-size: 45px;
 		font-weight: 700;
 		color: rgb(41, 43, 38);
 		text-align: center;

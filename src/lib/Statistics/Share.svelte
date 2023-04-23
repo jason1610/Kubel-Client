@@ -179,4 +179,17 @@
 		font-size: 0.65rem;
 		white-space: nowrap;
 	}
+
+	@media (max-width: 1500px) {
+		button {
+			grid-column: 2;
+			grid-row: 6;
+		}
+	}
+	@media (max-width: 700px) {
+		button {
+			grid-column: 1;
+			grid-row: 8;
+		}
+	}
 </style>

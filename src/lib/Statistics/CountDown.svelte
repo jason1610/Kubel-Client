@@ -80,4 +80,17 @@
 		font-size: 0.7rem;
 		color: rgba(255, 255, 255, 0.8);
 	}
+
+	@media (max-width: 1500px) {
+		.card {
+			grid-column: 2;
+			grid-row: 7;
+		}
+	}
+	@media (max-width: 700px) {
+		.card {
+			grid-column: 1;
+			grid-row: 9;
+		}
+	}
 </style>

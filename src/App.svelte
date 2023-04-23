@@ -30,6 +30,7 @@
 		let localDailyData: any = localStorage.getItem("dailyData");
 		if (localDailyData === null) return false;
 		localDailyData = JSON.parse(localDailyData);
+		if (localDailyData.seed !== data.seed) return false;
 		if (localDailyData.version !== data.version) return false;
 		// if (localDailyData.pieceMap.length !== data.pieceMap.length) return false;
 		// if (localDailyData.pieceMap[0].length !== data.pieceMap[0].length) return false;
@@ -139,16 +140,14 @@
 	.layout {
 		gap: 50px;
 		display: flex;
-		align-items: center;
 		justify-content: center;
 		align-items: center;
-		padding-bottom: 10vh;
-		min-height: 75vh;
-		min-height: 75lvh;
-	}
-	@media (orientation: portrait), (max-width: 1400px) {
-		.layout {
-			flex-direction: column;
-		}
+		flex-wrap: wrap;
+		padding: 0 5vw;
+		max-width: 100vw;
+		padding-bottom: 50px;
+		box-sizing: border-box;
+		min-height: calc(100vh - 70px);
+		min-height: calc(100svh - 70px);
 	}
 </style>

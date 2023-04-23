@@ -182,4 +182,16 @@
 		width: 100%;
 		height: 100%;
 	}
+	@media (max-width: 1500px) {
+		.card {
+			grid-column: 1 / span 3;
+			grid-row: 2 / span 2;
+		}
+	}
+	@media (max-width: 700px) {
+		.card {
+			grid-column: 1 / span 2;
+			grid-row: 2 / span 2;
+		}
+	}
 </style>

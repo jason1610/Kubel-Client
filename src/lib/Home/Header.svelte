@@ -64,7 +64,8 @@
 <style>
 	header {
 		height: 70px;
-		padding: 10px 30px;
+		box-sizing: border-box;
+		padding: 10px 25px;
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;

@@ -34,4 +34,11 @@
 		transform: scale(1) translate(0, 0.15rem);
 		box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 	}
+
+	@media (max-width: 1500px) {
+		button {
+			grid-column: 1;
+			grid-row: 6 / span 2;
+		}
+	}
 </style>

@@ -316,17 +316,11 @@
 			offset.y = gridOffsetY;
 		}
 
-		const cellIndexX = Math.floor(dx / displayedCellSize);
-		const cellIndexY = Math.floor(dy / displayedCellSize);
-		const currentCellCenterX = cellIndexX * displayedCellSize + displayedCellSize / 2;
-		const currentCellCenterY = cellIndexY * displayedCellSize + displayedCellSize / 2;
-		const offsetX = e.clientX - currentCellCenterX;
-		const offsetY = e.clientY - currentCellCenterY;
 		pixelOffsetDelta = {
-			x: offsetX,
-			y: offsetY,
+			x: Math.abs((dx + (Math.sign(dx) * displayedCellSize) / 2) % displayedCellSize),
+			y: Math.abs((dy + displayedCellSize / 2) % displayedCellSize) - displayedCellSize / 2,
 		};
-		console.log(pixelOffsetDelta);
+		// console.log(pixelOffsetDelta);
 		if (offset.x === lastOffset.x && offset.y === lastOffset.y) return;
 		offsetDelta.x = offset.x - lastOffset.x;
 		offsetDelta.y = offset.y - lastOffset.y;
@@ -555,19 +549,23 @@
 	});
 </script>
 
-<div class="board" style="cursor: {allowInput ? (isDragging ? 'grabbing' : 'grab') : ''}">
+<div
+	class="board"
+	style="cursor: {allowInput
+		? isDragging
+			? 'grabbing'
+			: 'grab'
+		: ''}; border-radius: {borderRadius}px"
+>
 	<canvas bind:this={canvas} />
 </div>
 
 <style>
 	.board {
-		width: 550px;
-		max-width: 90vw;
 		aspect-ratio: 1/1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		border-radius: 35px;
 		background: rgba(0, 0, 0, 0.75);
 	}
 	canvas {

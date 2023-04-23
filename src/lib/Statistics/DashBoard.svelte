@@ -59,7 +59,6 @@
 
 	.dashboard-container {
 		position: relative;
-		align-self: center;
 		display: grid;
 		grid-template-columns: repeat(5, 1fr);
 		grid-template-rows: repeat(6, 1fr);
@@ -67,10 +66,10 @@
 		background: #161b21;
 		padding: 20px;
 		border-radius: 10px;
-		max-width: 90vw;
 		box-sizing: border-box;
-		width: 700px;
-		height: 525px;
+		max-width: 700px;
+		height: 550px;
+		width: 100%;
 		animation: spawn 0.5s ease forwards;
 	}
 
@@ -104,12 +103,16 @@
 		/* text-transform: uppercase; */
 	}
 
-	@media (orientation: portrait), (max-width: 1400px) {
+	@media (max-width: 1500px) {
 		.dashboard-container {
-			display: flex;
-			flex-direction: column;
-			/* max-width: 100vw; set max width to full viewport width */
-			height: auto; /* let height adjust to content */
+			grid-template-columns: repeat(3, 1fr);
+			height: auto;
+		}
+	}
+
+	@media (max-width: 700px) {
+		.dashboard-container {
+			grid-template-columns: repeat(2, 1fr);
 		}
 	}
 </style>

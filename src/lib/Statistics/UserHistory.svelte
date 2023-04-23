@@ -210,4 +210,10 @@
 		width: 100%;
 		height: 100%;
 	}
+	@media (max-width: 1500px) {
+		.card {
+			grid-column: 1 / span 2;
+			grid-row: 4 / span 2;
+		}
+	}
 </style>

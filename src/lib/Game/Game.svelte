@@ -12,13 +12,13 @@
 	});
 </script>
 
-<div class="game-wrapper">
+<div class="game-container">
 	<Counter />
 	<Board {mapData} />
 </div>
 
 <style>
-	.game-wrapper {
+	.game-container {
 		display: flex;
 		align-items: center;
 		flex-direction: column;

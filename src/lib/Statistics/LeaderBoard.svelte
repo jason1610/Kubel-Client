@@ -112,4 +112,17 @@
 		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
 		width: 50px;
 	}
+
+	@media (max-width: 1500px) {
+		.card {
+			grid-column: 3;
+			grid-row: 4 / span 5;
+		}
+	}
+	@media (max-width: 700px) {
+		.card {
+			grid-column: 2;
+			grid-row: 6 / span 4;
+		}
+	}
 </style>
