@@ -2,29 +2,26 @@
 	import { onMount } from "svelte";
 	import logo from "../../assets/logo.svg";
 	import help from "../../assets/help-icon.svg";
-	import { userCountry, changeCountry, showHelp } from "../../GlobalStore";
+	import { userCountry, changeCountry, showHelp, hasPlayedToday } from "../../GlobalStore";
 	import { hasWon } from "../../lib/Game/GameStore";
 
 	let country = localStorage.getItem("userCountry");
-	let hasPlayedToday: boolean = false;
 
-	const checkIfPlayed = () => {
-		let userStats: any = localStorage.getItem("userStats");
-		if (userStats) {
-			userStats = JSON.parse(userStats);
-			if (userStats.dailyHistory.length > 0) {
-				hasPlayedToday = true;
-			}
-		}
+	const checkIfEverPlayed = () => {
+		let progressData: any = localStorage.getItem("userStats");
+		if (progressData === null) return false;
+		progressData = JSON.parse(progressData);
+		if (progressData.scoreHistory.length > 0) return true;
+		return false;
 	};
 
 	onMount(() => {
+		console.log(checkIfEverPlayed());
 		const unsubscribe = hasWon.subscribe((value) => {
 			if (value) {
-				hasPlayedToday = true;
+				hasPlayedToday.set(true);
 			}
 		});
-		checkIfPlayed();
 		return () => {
 			unsubscribe();
 		};
@@ -37,14 +34,22 @@
 		<h1>KUBEL.io</h1>
 	</div>
 	{#if $userCountry}
-		<button class="flag" disabled={hasPlayedToday} on:click={() => changeCountry.set(true)}>
+		<button
+			class="flag {checkIfEverPlayed() && !$hasPlayedToday ? 'glow' : ''}"
+			disabled={$hasPlayedToday}
+			on:click={() => changeCountry.set(true)}
+		>
 			<img
 				src={`https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/4x3/${$userCountry.toLowerCase()}.svg`}
 				alt="flag"
 			/>
 		</button>
 	{:else if country}
-		<button class="flag" disabled={hasPlayedToday} on:click={() => changeCountry.set(true)}>
+		<button
+			class="flag {checkIfEverPlayed() && !$hasPlayedToday ? 'glow' : ''}"
+			disabled={$hasPlayedToday}
+			on:click={() => changeCountry.set(true)}
+		>
 			<img
 				src={`https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/flags/4x3/${country.toLowerCase()}.svg`}
 				alt="flag"
@@ -138,5 +143,17 @@
 	}
 	.help:hover img {
 		opacity: 1;
+	}
+
+	.glow {
+		animation: glow 1s ease-in-out infinite alternate;
+	}
+	@keyframes glow {
+		0% {
+			filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.5));
+		}
+		100% {
+			filter: drop-shadow(0 0 7px rgba(255, 255, 255, 1));
+		}
 	}
 </style>

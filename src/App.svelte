@@ -15,11 +15,10 @@
 	import { showDashBoard } from "./lib/Game/GameStore";
 	import Background from "./lib/Home/Background.svelte";
 	import CountryPicker from "./lib/Home/CountryPicker.svelte";
-	import { changeCountry, showHelp } from "./GlobalStore";
+	import { changeCountry, showHelp, hasPlayedToday } from "./GlobalStore";
 	import Help from "./lib/Home/Help.svelte";
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	let loadingState: String = "Loading";
-	const version: number = 1;
 
 	import type { MapData } from "./Interfaces";
 	import DashBoard from "./lib/Statistics/DashBoard.svelte";
@@ -79,6 +78,7 @@
 							userStats = JSON.parse(userStatsString);
 							userStats.dailyHistory = [];
 							localStorage.setItem("userStats", JSON.stringify(userStats));
+							hasPlayedToday.set(false);
 						}
 					}
 					loadingState = "Loaded";

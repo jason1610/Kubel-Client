@@ -29,7 +29,7 @@
 	let colorCount: number[];
 	let app: PIXI.Application;
 	let canvas: HTMLCanvasElement;
-	const pieceSpeed: number = 0.4;
+	const pieceSpeed: number = 0.35;
 	let gridSize: number = mapData.pieceMap.length;
 	const cellSize: number = canvasSize / gridSize;
 	const borderRadius: number = cellSize / 7;
@@ -47,6 +47,7 @@
 	let selectedPos: Vector = { x: 0, y: 0 };
 	let pixelOffsetDelta: Vector = { x: 0, y: 0 };
 	let lastPieceMap: any = pieceMap.map((row: any[]) => [...row]);
+	let tempPieceMap: any = pieceMap.map((row: any[]) => [...row]);
 
 	const getDisplayedCellSize = () => {
 		const currentCanvasWidth = canvas.clientWidth;
@@ -128,8 +129,21 @@
 		return start + (end - start) * pieceSpeed * 2;
 	};
 
+	const isMatrixTheSame = (matrix1: any, matrix2: any) => {
+		for (let x = 0; x < gridSize; x++) {
+			for (let y = 0; y < gridSize; y++) {
+				if (matrix1[x][y] !== matrix2[x][y]) return false;
+			}
+		}
+		return true;
+	};
+
 	const animate = () => {
 		const newPieceMap = calculateNewPieceMap();
+		if (!isMatrixTheSame(newPieceMap, tempPieceMap)) {
+			lastPieceMap = tempPieceMap.map((row: any[]) => [...row]);
+			tempPieceMap = newPieceMap.map((row: any[]) => [...row]);
+		}
 
 		for (let x = 0; x < gridSize; x++) {
 			for (let y = 0; y < gridSize; y++) {
@@ -158,40 +172,31 @@
 					lerpPos(piece.position.y, newPos.y)
 				);
 				//get offset between old and new position
-				const oldPostion = getIdPosition(lastPieceMap[x][y].id);
+				const lastPosition = getIdPosition(newPieceMap[x][y].id, lastPieceMap);
 				const pieceOffset = {
-					x: x - oldPostion.x,
-					y: y - oldPostion.y,
+					x: x - lastPosition.x,
+					y: y - lastPosition.y,
 				};
 				const isWrappingX: boolean = Math.sign(pieceOffset.x) !== Math.sign(offsetDelta.x);
 				const isWrappingY: boolean = Math.sign(pieceOffset.y) !== Math.sign(offsetDelta.y);
 
-				// if (offset.x !== 0 && y === selectedPos.y && isWrappingX) {
-				// 	piece.scale.set(0.5);
-				// } else {
-				// 	piece.scale.set(1);
-				// }
-
-				// if (
-				// 	(offset.x !== 0 || offset.y !== 0) &&
-				// 	(x === selectedPos.x || y === selectedPos.y) &&
-				// 	(isWrappingX || isWrappingY)
-				// ) {
-				// 	piece.zIndex = 10;
-				// 	piece.scale.set(0.3);
-				// } else {
-				// 	piece.scale.set(1);
-				// 	piece.zIndex = 0;
-				// }
+				if (
+					(offset.x !== 0 && y === selectedPos.y && isWrappingX) ||
+					(offset.y !== 0 && x === selectedPos.x && isWrappingY)
+				) {
+					piece.zIndex = -1;
+				} else {
+					piece.zIndex = 0;
+				}
 			}
 		}
 	};
 
-	const getIdPosition = (id: string) => {
-		for (let x = 0; x < gridSize; x++) {
-			for (let y = 0; y < gridSize; y++) {
-				if (pieceMap[x][y] === null) continue;
-				if (pieceMap[x][y].id === id) return { x, y };
+	const getIdPosition = (id: string, map: any) => {
+		for (let x = 0; x < map.length; x++) {
+			for (let y = 0; y < map[0].length; y++) {
+				if (map[x][y] === null) continue;
+				if (map[x][y].id === id) return { x, y };
 			}
 		}
 		return { x: 0, y: 0 };
@@ -314,7 +319,7 @@
 	const onPointerDown = (id: string) => {
 		if (!allowInput) return;
 		isDragging = true;
-		const piecePosition = getIdPosition(id);
+		const piecePosition = getIdPosition(id, pieceMap);
 		const piecePixelPosition = worldToGrid(piecePosition);
 		const displayedCellSize = getDisplayedCellSize();
 		const pieceCenterX = piecePixelPosition.x + displayedCellSize / 2;
@@ -362,7 +367,6 @@
 		offsetDelta.x = offset.x - lastOffset.x;
 		offsetDelta.y = offset.y - lastOffset.y;
 		lastOffset = { x: offset.x, y: offset.y };
-		lastPieceMap = pieceMap.map((row: any[]) => [...row]);
 	};
 
 	const saveData = () => {
@@ -457,7 +461,7 @@
 		animateDeselectedPiece(app.stage.getChildByName(selectedPiece), $selectedColor);
 		selectedColor.set(null);
 		pieceMap = calculateNewPieceMap().map((row: any[]) => [...row]);
-		const selectedPieceNewPos = getIdPosition(selectedPiece);
+		const selectedPieceNewPos = getIdPosition(selectedPiece, pieceMap);
 		if (
 			!(selectedPieceNewPos.x === selectedPos.x && selectedPieceNewPos.y === selectedPos.y)
 		) {
@@ -574,6 +578,7 @@
 		}
 
 		app.stage.eventMode = "static";
+		app.stage.sortableChildren = true;
 		window.addEventListener("pointermove", (e) => {
 			onPointerMove(e);
 		});
