@@ -11,7 +11,7 @@
 		let progressData: any = localStorage.getItem("userStats");
 		if (progressData === null) return false;
 		progressData = JSON.parse(progressData);
-		if (progressData.scoreHistory.length > 0) return true;
+		if (progressData.gamesWon > 0) return true;
 		return false;
 	};
 

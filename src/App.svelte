@@ -78,8 +78,11 @@
 							userStats = JSON.parse(userStatsString);
 							userStats.dailyHistory = [];
 							localStorage.setItem("userStats", JSON.stringify(userStats));
-							hasPlayedToday.set(false);
 						}
+					}
+					let dailyHistory = JSON.parse(localStorage.getItem("userStats")).dailyHistory;
+					if (dailyHistory.length === 0) {
+						hasPlayedToday.set(false);
 					}
 					loadingState = "Loaded";
 				} else {

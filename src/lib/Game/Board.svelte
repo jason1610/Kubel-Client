@@ -29,7 +29,8 @@
 	let colorCount: number[];
 	let app: PIXI.Application;
 	let canvas: HTMLCanvasElement;
-	const pieceSpeed: number = 0.35;
+	const pieceSpeed: number = 0.4;
+	const piecePixelOffsetStrength: number = 0.15;
 	let gridSize: number = mapData.pieceMap.length;
 	const cellSize: number = canvasSize / gridSize;
 	const borderRadius: number = cellSize / 7;
@@ -116,13 +117,8 @@
 		return newPieceMap;
 	};
 
-	const easeInOutQuad = (t: number) => {
-		return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-	};
-
 	const lerpPos = (start: number, end: number) => {
-		const easedT = easeInOutQuad(pieceSpeed);
-		return start + (end - start) * easedT;
+		return start + (end - start) * pieceSpeed;
 	};
 
 	const lerpSize = (start: number, end: number) => {
@@ -150,20 +146,20 @@
 				if (pieceMap[x][y] === null) continue;
 				const piece = app.stage.getChildByName(newPieceMap[x][y].id);
 				let newPos = {
-					x: x * gap + x * pieceSize + gap,
-					y: y * gap + y * pieceSize + gap,
+					x: piece.position.x + (x * gap + x * pieceSize + gap - piece.position.x) * 0.6,
+					y: piece.position.y + (y * gap + y * pieceSize + gap - piece.position.y) * 0.6,
 				};
 				if (offset.x === 0 && offset.y === 0) {
 					if (x === selectedPos.x && y === selectedPos.y) {
-						newPos.x += pixelOffsetDelta.x * 0.4;
-						newPos.y += pixelOffsetDelta.y * 0.4;
+						newPos.x += pixelOffsetDelta.x * piecePixelOffsetStrength;
+						newPos.y += pixelOffsetDelta.y * piecePixelOffsetStrength;
 					}
 				} else {
 					if (y === selectedPos.y && lockedAxis === "x") {
-						newPos.x += pixelOffsetDelta.x * 0.4;
+						newPos.x += pixelOffsetDelta.x * piecePixelOffsetStrength;
 					}
 					if (x === selectedPos.x && lockedAxis === "y") {
-						newPos.y += pixelOffsetDelta.y * 0.4;
+						newPos.y += pixelOffsetDelta.y * piecePixelOffsetStrength;
 					}
 				}
 
