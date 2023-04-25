@@ -27,7 +27,7 @@
 
 	const isLocalDataValid = (data: any) => {
 		let localDailyData: any = localStorage.getItem("dailyData");
-		if (localDailyData === null) return false;
+		if (!localDailyData) return false;
 		localDailyData = JSON.parse(localDailyData);
 		if (localDailyData.seed !== data.seed) return false;
 		if (localDailyData.version !== data.version) return false;
@@ -78,11 +78,29 @@
 							userStats = JSON.parse(userStatsString);
 							userStats.dailyHistory = [];
 							localStorage.setItem("userStats", JSON.stringify(userStats));
+							let dailyHistory = JSON.parse(localStorage.getItem("userStats")).dailyHistory;
+							if (dailyHistory.length === 0) {
+								hasPlayedToday.set(false);
+							}
+							console.log("No user stats found");
+						} else {
+							hasPlayedToday.set(false);
 						}
-					}
-					let dailyHistory = JSON.parse(localStorage.getItem("userStats")).dailyHistory;
-					if (dailyHistory.length === 0) {
-						hasPlayedToday.set(false);
+					} else {
+						let userStatsString = localStorage.getItem("userStats");
+						let userStats: any;
+						if (userStatsString) {
+							userStats = JSON.parse(userStatsString);
+							userStats.dailyHistory = [];
+							localStorage.setItem("userStats", JSON.stringify(userStats));
+							let dailyHistory = JSON.parse(localStorage.getItem("userStats")).dailyHistory;
+							if (dailyHistory.length === 0) {
+								hasPlayedToday.set(false);
+							}
+							console.log("No user stats found");
+						} else {
+							hasPlayedToday.set(false);
+						}
 					}
 					loadingState = "Loaded";
 				} else {

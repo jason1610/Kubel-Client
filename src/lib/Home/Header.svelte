@@ -16,16 +16,23 @@
 	};
 
 	onMount(() => {
-		if (!checkIfEverPlayed()) {
-			showHelp.set(true);
-		}
-		const unsubscribe = hasWon.subscribe((value) => {
+		const unsubscribeUserCountry = userCountry.subscribe((value) => {
+			if (value) {
+				if (!checkIfEverPlayed()) {
+					setTimeout(() => {
+						showHelp.set(true);
+					}, 1000);
+				}
+			}
+		});
+		const unsubscribeHasWon = hasWon.subscribe((value) => {
 			if (value) {
 				hasPlayedToday.set(true);
 			}
 		});
 		return () => {
-			unsubscribe();
+			unsubscribeHasWon();
+			unsubscribeUserCountry();
 		};
 	});
 </script>
