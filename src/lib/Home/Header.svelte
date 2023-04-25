@@ -16,7 +16,6 @@
 	};
 
 	onMount(() => {
-		console.log(checkIfEverPlayed());
 		const unsubscribe = hasWon.subscribe((value) => {
 			if (value) {
 				hasPlayedToday.set(true);

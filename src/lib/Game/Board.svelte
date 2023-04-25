@@ -29,8 +29,10 @@
 	let colorCount: number[];
 	let app: PIXI.Application;
 	let canvas: HTMLCanvasElement;
-	const pieceSpeed: number = 0.4;
-	const piecePixelOffsetStrength: number = 0.15;
+	const pieceSpeed: number = 0.5;
+	// old = 0.4
+	const piecePixelOffsetStrength: number = 0.2;
+	// old = 0.15
 	let gridSize: number = mapData.pieceMap.length;
 	const cellSize: number = canvasSize / gridSize;
 	const borderRadius: number = cellSize / 7;
@@ -39,6 +41,8 @@
 	let isDragging = false;
 	let selectedPiece: string = "";
 	let allowInput: boolean = false;
+	let lastEmptyOffsetX: number = 0;
+	let lastEmptyOffsetY: number = 0;
 	let offset: Vector = { x: 0, y: 0 };
 	let pieceMap: any = mapData.pieceMap;
 	let dragStart: Vector = { x: 0, y: 0 };
@@ -60,7 +64,7 @@
 		return displayedCellSize;
 	};
 
-	const worldToGrid = (pos: any) => {
+	const gridToWorld = (pos: any) => {
 		const displayedCellSize = getDisplayedCellSize();
 		const canvasBounds = canvas.getBoundingClientRect();
 		const canvasOffsetX = canvasBounds.left;
@@ -149,6 +153,11 @@
 					x: piece.position.x + (x * gap + x * pieceSize + gap - piece.position.x) * 0.6,
 					y: piece.position.y + (y * gap + y * pieceSize + gap - piece.position.y) * 0.6,
 				};
+				//maybe revert back to this i dunno
+				// let newPos = {
+				// 	x: x * gap + x * pieceSize + gap,
+				// 	y: y * gap + y * pieceSize + gap,
+				// };
 				if (offset.x === 0 && offset.y === 0) {
 					if (x === selectedPos.x && y === selectedPos.y) {
 						newPos.x += pixelOffsetDelta.x * piecePixelOffsetStrength;
@@ -316,7 +325,7 @@
 		if (!allowInput) return;
 		isDragging = true;
 		const piecePosition = getIdPosition(id, pieceMap);
-		const piecePixelPosition = worldToGrid(piecePosition);
+		const piecePixelPosition = gridToWorld(piecePosition);
 		const displayedCellSize = getDisplayedCellSize();
 		const pieceCenterX = piecePixelPosition.x + displayedCellSize / 2;
 		const pieceCenterY = piecePixelPosition.y + displayedCellSize / 2;
@@ -332,6 +341,48 @@
 		);
 	};
 
+	const getEmptySpaceOffsetX = (offsetX: number) => {
+		const direction: number = Math.sign(offsetX);
+		let posX: number = selectedPos.x;
+		let emptyOffset: number = 0;
+		for (let i = 0; i < Math.abs(offsetX); i++) {
+			posX += direction;
+			if (posX < 0 || posX >= pieceMap.length) {
+				lastEmptyOffsetX = offsetX - emptyOffset;
+				return lastEmptyOffsetX;
+			}
+			if (pieceMap[posX][selectedPos.y] === null) {
+				emptyOffset += direction;
+			}
+		}
+		if (pieceMap[posX][selectedPos.y] !== null) {
+			lastEmptyOffsetX = offsetX - emptyOffset;
+			return lastEmptyOffsetX;
+		}
+		return lastEmptyOffsetX;
+	};
+
+	const getEmptySpaceOffsetY = (offsetY: number) => {
+		const direction: number = Math.sign(offsetY);
+		let posY: number = selectedPos.y;
+		let emptyOffset: number = 0;
+		for (let i = 0; i < Math.abs(offsetY); i++) {
+			posY += direction;
+			if (posY < 0 || posY >= pieceMap[0].length) {
+				lastEmptyOffsetY = offsetY - emptyOffset;
+				return lastEmptyOffsetY;
+			}
+			if (pieceMap[selectedPos.x][posY] === null) {
+				emptyOffset += direction;
+			}
+		}
+		if (pieceMap[selectedPos.x][posY] !== null) {
+			lastEmptyOffsetY = offsetY - emptyOffset;
+			return lastEmptyOffsetY;
+		}
+		return lastEmptyOffsetY;
+	};
+
 	const onPointerMove = (e: any) => {
 		if (!isDragging) return;
 		const dx = e.clientX - dragStart.x;
@@ -339,15 +390,21 @@
 		const displayedCellSize = getDisplayedCellSize();
 		const gridOffsetX = Math.round(dx / displayedCellSize);
 		const gridOffsetY = Math.round(dy / displayedCellSize);
+
 		if (gridOffsetX === 0 && gridOffsetY === 0) lockedAxis = null;
 		if (!lockedAxis) lockedAxis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
 		if (lockedAxis === "x") {
-			offset.x = gridOffsetX;
+			offset.x = getEmptySpaceOffsetX(gridOffsetX);
 			offset.y = 0;
 		} else {
 			offset.x = 0;
-			offset.y = gridOffsetY;
+			offset.y = getEmptySpaceOffsetY(gridOffsetY);
 		}
+		// const newDx =
+		// 	Math.sign(dx) === 1
+		// 		? Math.min(dx, cellSize * offset.x + cellSize / 2)
+		// 		: Math.max(Math.abs(dx), cellSize * offset.x - cellSize / 2);
+
 		pixelOffsetDelta = {
 			x:
 				(((Math.abs(dx) + displayedCellSize / 2) % displayedCellSize) -
@@ -358,6 +415,20 @@
 					displayedCellSize / 2) *
 				(dy === 0 ? 1 : Math.sign(dy)),
 		};
+
+		let mouseGridPos = {
+			x: selectedPos.x + gridOffsetX,
+			y: selectedPos.y + gridOffsetY,
+		};
+		const selectedPiecePos = getIdPosition(selectedPiece, tempPieceMap);
+
+		if (mouseGridPos.x !== selectedPiecePos.x) {
+			pixelOffsetDelta.x = (cellSize / 2) * Math.sign(mouseGridPos.x - selectedPiecePos.x);
+		}
+
+		if (mouseGridPos.y !== selectedPiecePos.y) {
+			pixelOffsetDelta.y = (cellSize / 2) * Math.sign(mouseGridPos.y - selectedPiecePos.y);
+		}
 
 		if (offset.x === lastOffset.x && offset.y === lastOffset.y) return;
 		offsetDelta.x = offset.x - lastOffset.x;
