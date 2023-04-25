@@ -16,6 +16,9 @@
 	};
 
 	onMount(() => {
+		if (!checkIfEverPlayed()) {
+			showHelp.set(true);
+		}
 		const unsubscribe = hasWon.subscribe((value) => {
 			if (value) {
 				hasPlayedToday.set(true);

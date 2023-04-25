@@ -425,7 +425,7 @@
 		};
 
 		if (
-			(mouseGridPos.x > 0 &&
+			(mouseGridPos.x >= 0 &&
 				mouseGridPos.x < pieceMap.length &&
 				mouseGridPos.x !== selectedPiecePos.x) ||
 			((mouseGridPos.x < 0 || mouseGridPos.x >= pieceMap.length) &&
@@ -434,9 +434,8 @@
 			pixelOffsetDelta.x = (cellSize / 2) * Math.sign(mouseGridPos.x - selectedPiecePos.x);
 		}
 
-		// if (mouseGridPos.y !== selectedPiecePos.y) {
 		if (
-			(mouseGridPos.y > 0 &&
+			(mouseGridPos.y >= 0 &&
 				mouseGridPos.y < pieceMap.length &&
 				mouseGridPos.y !== selectedPiecePos.y) ||
 			((mouseGridPos.y < 0 || mouseGridPos.y >= pieceMap[0].length) &&

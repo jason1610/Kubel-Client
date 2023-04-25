@@ -21,7 +21,8 @@
 		border: 5px solid rgba(255, 255, 255, 0.04);
 		cursor: pointer;
 		transition: all 0.2s;
-		padding: 10px 0;
+		padding: 10px 10px;
+		line-height: 20px;
 		letter-spacing: 1.5px;
 	}
 
