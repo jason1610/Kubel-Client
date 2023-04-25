@@ -400,10 +400,6 @@
 			offset.x = 0;
 			offset.y = getEmptySpaceOffsetY(gridOffsetY);
 		}
-		// const newDx =
-		// 	Math.sign(dx) === 1
-		// 		? Math.min(dx, cellSize * offset.x + cellSize / 2)
-		// 		: Math.max(Math.abs(dx), cellSize * offset.x - cellSize / 2);
 
 		pixelOffsetDelta = {
 			x:
@@ -420,13 +416,32 @@
 			x: selectedPos.x + gridOffsetX,
 			y: selectedPos.y + gridOffsetY,
 		};
-		const selectedPiecePos = getIdPosition(selectedPiece, tempPieceMap);
 
-		if (mouseGridPos.x !== selectedPiecePos.x) {
+		const newPieceMap = calculateNewPieceMap();
+		const selectedPiecePos = getIdPosition(selectedPiece, newPieceMap);
+		const selectedPieceOffGridPos: Vector = {
+			x: selectedPos.x + gridOffsetX,
+			y: selectedPos.y + gridOffsetY,
+		};
+
+		if (
+			(mouseGridPos.x > 0 &&
+				mouseGridPos.x < pieceMap.length &&
+				mouseGridPos.x !== selectedPiecePos.x) ||
+			((mouseGridPos.x < 0 || mouseGridPos.x >= pieceMap.length) &&
+				mouseGridPos.x !== selectedPieceOffGridPos.x)
+		) {
 			pixelOffsetDelta.x = (cellSize / 2) * Math.sign(mouseGridPos.x - selectedPiecePos.x);
 		}
 
-		if (mouseGridPos.y !== selectedPiecePos.y) {
+		// if (mouseGridPos.y !== selectedPiecePos.y) {
+		if (
+			(mouseGridPos.y > 0 &&
+				mouseGridPos.y < pieceMap.length &&
+				mouseGridPos.y !== selectedPiecePos.y) ||
+			((mouseGridPos.y < 0 || mouseGridPos.y >= pieceMap[0].length) &&
+				mouseGridPos.y !== selectedPieceOffGridPos.y)
+		) {
 			pixelOffsetDelta.y = (cellSize / 2) * Math.sign(mouseGridPos.y - selectedPiecePos.y);
 		}
 
