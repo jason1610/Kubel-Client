@@ -82,7 +82,6 @@
 							if (dailyHistory.length === 0) {
 								hasPlayedToday.set(false);
 							}
-							console.log("No user stats found");
 						} else {
 							hasPlayedToday.set(false);
 						}
@@ -90,14 +89,10 @@
 						let userStatsString = localStorage.getItem("userStats");
 						let userStats: any;
 						if (userStatsString) {
-							userStats = JSON.parse(userStatsString);
-							userStats.dailyHistory = [];
-							localStorage.setItem("userStats", JSON.stringify(userStats));
 							let dailyHistory = JSON.parse(localStorage.getItem("userStats")).dailyHistory;
 							if (dailyHistory.length === 0) {
 								hasPlayedToday.set(false);
 							}
-							console.log("No user stats found");
 						} else {
 							hasPlayedToday.set(false);
 						}

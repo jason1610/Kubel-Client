@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { fade } from "svelte/transition";
 
+	let messageVisible = false;
 	const dailyData = JSON.parse(localStorage.getItem("dailyData"));
 	const pieceMap = dailyData.pieceMap;
 	const palette = dailyData.palette;
@@ -53,6 +55,16 @@
 		return [r, g, b];
 	}
 
+	function showMessage() {
+		const message = document.createElement("div");
+		message.classList.add("bubble-message");
+		message.textContent = "Copied to clipboard!";
+		document.body.appendChild(message);
+		setTimeout(() => {
+			message.remove();
+		}, 3000); // Adjust the duration as needed (currently 3 seconds)
+	}
+
 	function colorDistance(color1, color2) {
 		const [r1, g1, b1] = color1;
 		const [r2, g2, b2] = color2;
@@ -86,8 +98,6 @@
 		return emojiMap;
 	}
 
-	const copyTextToClipboard = () => {};
-
 	let shareText: string =
 		"Solved in " +
 		dailyData.moves.length +
@@ -114,17 +124,11 @@
 </script>
 
 <button
-	on:click={() => navigator.clipboard.writeText(`${shareText}\n${shareMap.flat().join("\n")}`)}
-	>Copy & Share</button
+	on:click={() => {
+		navigator.clipboard.writeText(`${shareText}\n${shareMap.flat().join("\n")}`);
+		showMessage();
+	}}>Copy & Share</button
 >
-
-<!-- <div class="card">
-	<div class="board">
-		{#each shareMap as line}
-			<p>{line}</p>
-		{/each}
-	</div>
-</div> -->
 
 <style>
 	.card {
@@ -147,6 +151,41 @@
 		align-items: center;
 		/* --webkit-mask-image: radial-gradient(rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%);
 		mask-image: radial-gradient(rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%); */
+	}
+
+	:global(.bubble-message) {
+		position: fixed;
+		bottom: 20px;
+		left: 50%;
+		transform: translateX(-50%);
+		background-color: #319dff;
+		color: #fff;
+		padding: 10px 20px;
+		border-radius: 4px;
+		font-size: 14px;
+		z-index: 1000;
+		opacity: 0;
+		animation: spawn 3s ease-in-out;
+	}
+
+	@keyframes spawn {
+		0% {
+			transform: translate(-50px, 50px);
+			opacity: 0;
+		}
+		10% {
+			transform: translate(-50px, 0);
+
+			opacity: 1;
+		}
+		75% {
+			transform: translate(-50px, 0);
+			opacity: 1;
+		}
+		100% {
+			transform: translate(-50px, 0);
+			opacity: 0;
+		}
 	}
 
 	button {

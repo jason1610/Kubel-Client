@@ -2,6 +2,7 @@
 	import { prevent_default } from "svelte/internal";
 	import { showHelp } from "../../GlobalStore";
 	import tutorialVideo from "../../assets/tutorial-solve.mp4";
+	import tutorialPoster from "../../assets/tutorial-poster.svg";
 	import closeIcon from "../../assets/close-icon.svg";
 
 	const hideHelp = (e: any) => {
@@ -16,7 +17,12 @@
 		<button on:click={() => showHelp.set(false)}>
 			<img src={closeIcon} alt="" />
 		</button>
-		<video src={tutorialVideo} preload="auto" autoplay loop />
+		<div class="video-container">
+			<video src={tutorialVideo} poster={tutorialPoster} autoplay loop muted playsinline>
+				<source src={tutorialVideo} type="video/mp4" />
+			</video>
+		</div>
+
 		<h2>How to play</h2>
 		<p>
 			<span>Click and drag</span> a piece to move the row or collumn. Win the game by moving
@@ -48,19 +54,27 @@
 		z-index: 1;
 		cursor: pointer;
 		box-sizing: border-box;
-		padding: 0 5vw;
+	}
+
+	.screen-container ~ * {
+		touch-action: none;
+		pointer-events: none;
 	}
 
 	.card-container {
 		padding: 30px;
 		width: 400px;
 		cursor: default;
+		max-width: 80vw;
+		max-height: 50vh;
+		max-height: 85svh;
+		overflow-y: scroll;
+		box-sizing: border-box;
 		background: #d7d7d7;
 		border-radius: 10px;
 		box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.3);
-		overflow: hidden;
 		display: flex;
-		justify-content: center;
+		/* justify-content: center; */
 		align-items: center;
 		flex-direction: column;
 		gap: 20px;
@@ -104,10 +118,23 @@
 		opacity: 1;
 	}
 
-	video {
-		width: 80%;
+	.video-container {
+		width: 200px;
+		aspect-ratio: 1;
+		max-width: 80%;
+		/* overflow: hidden; */
+		-webkit-mask-image: -webkit-radial-gradient(white, black);
 		border-radius: 15%;
+		/* min-width: 200px; */
+		background-color: #1c1c1c;
 	}
+	video {
+		width: 100%;
+		height: 100%;
+		display: block;
+		object-fit: cover;
+	}
+
 	h2 {
 		font-size: 1.7rem;
 		font-weight: bold;
