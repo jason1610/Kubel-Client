@@ -660,6 +660,7 @@
 
 		app.stage.eventMode = "static";
 		app.stage.sortableChildren = true;
+
 		window.addEventListener("pointermove", (e) => {
 			onPointerMove(e);
 		});
@@ -682,7 +683,7 @@
 			: 'grab'
 		: ''}; border-radius: {borderRadius}px"
 >
-	<canvas bind:this={canvas} />
+	<canvas bind:this={canvas} style="pointer-events: {$hasWon ? 'none' : ''}" />
 </div>
 
 <style>

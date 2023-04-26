@@ -162,6 +162,7 @@
 		color: #fff;
 		padding: 10px 20px;
 		border-radius: 4px;
+		box-sizing: border-box;
 		font-size: 14px;
 		z-index: 1000;
 		opacity: 0;
@@ -170,20 +171,20 @@
 
 	@keyframes spawn {
 		0% {
-			transform: translate(-50px, 50px);
+			transform: translate(-50%, 50px);
 			opacity: 0;
 		}
 		10% {
-			transform: translate(-50px, 0);
+			transform: translate(-50%, 0);
 
 			opacity: 1;
 		}
 		75% {
-			transform: translate(-50px, 0);
+			transform: translate(-50%, 0);
 			opacity: 1;
 		}
 		100% {
-			transform: translate(-50px, 0);
+			transform: translate(-50%, 0);
 			opacity: 0;
 		}
 	}
@@ -196,7 +197,8 @@
 		font-size: 12px;
 		border: 0;
 		border-radius: 10px;
-		outline: 2px solid #319dff;
+		/* outline: 2px solid #319dff; */
+		box-shadow: 0 0 0 2px #319dff;
 		color: #319dff;
 		cursor: pointer;
 		background-color: #319bff18;
