@@ -36,10 +36,22 @@
 	let interval: number;
 
 	onMount(() => {
+		const storedData = localStorage.getItem("dailyData");
+		const parisToday = dayjs().tz("Europe/Paris").format("YYYYMMDD");
+		if (storedData) {
+			const parsedData = JSON.parse(storedData);
+			const seedDate = parsedData.seed;
+			if (seedDate !== parisToday) {
+				location.reload();
+			}
+		}
 		interval = setInterval(() => {
 			hoursRemaining = hoursRemainingUntilMidnightGMT2();
 			minutesRemaining = minutesRemainingUntilMidnightGMT2();
 			secondsRemaining = secondsRemainingUntilMidnightGMT2();
+			if (hoursRemaining <= 0 && minutesRemaining <= 0 && secondsRemaining <= 0) {
+				window.location.reload();
+			}
 		}, 1000);
 	});
 

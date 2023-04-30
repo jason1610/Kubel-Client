@@ -4,7 +4,7 @@
 	import countries from "i18n-iso-countries";
 	import Select from "svelte-select";
 	// import spinningEarth from "../../assets/spinning-earth.gif";
-	import earthFlag from "../../assets/earth-flag.png";
+	import logo from "../../assets/share-image.png";
 	const dispatch = createEventDispatcher();
 	let localCountry: string;
 	$: selectedCountry = "";
@@ -52,7 +52,12 @@
 			title={getCountryName(selectedCountry)}
 		/>
 	{:else}
-		<img class="flag" src={earthFlag} alt={"Earth"} title={"Flag of Earth"} />
+		<div class="title">
+			<h1>Welcome to Kubel!</h1>
+			<h2>Pick the country you want to play for.</h2>
+			<br />
+		</div>
+		<!-- <img class="flag" src={logo} alt={"Earth"} title={"Flag of Earth"} /> -->
 	{/if}
 	<div class="search">
 		<Select
@@ -79,7 +84,6 @@
 		align-items: center;
 		gap: 20px;
 		min-height: 200px;
-		/* background-color: red; */
 	}
 
 	.container .flag {
@@ -96,6 +100,24 @@
 		gap: 10px;
 		max-width: 80vw;
 	}
+	.title {
+		/* display: flex; */
+		/* padding: 0 100px; */
+		/* max-width: 180px; */
+		/* width: 400px; */
+		/* max-width: 100%; */
+	}
+	.title h1 {
+		font-size: 2rem;
+		font-weight: 600;
+		text-align: center;
+	}
+	.title h2 {
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 0.425);
+		text-align: center;
+	}
 
 	button {
 		font: "system-ui";
@@ -103,6 +125,7 @@
 		padding: 0 20px;
 		border: none;
 		cursor: pointer;
+		color: white;
 		background: radial-gradient(circle at 10% -40%, #87e53a 0%, #08d334 90%);
 	}
 </style>

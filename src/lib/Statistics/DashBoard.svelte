@@ -106,7 +106,7 @@
 	@media (max-width: 1500px) {
 		.dashboard-container {
 			grid-template-columns: repeat(3, 1fr);
-			height: auto;
+			height: 900px;
 		}
 	}
 
