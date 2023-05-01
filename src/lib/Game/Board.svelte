@@ -40,6 +40,7 @@
 
 	let isDragging = false;
 	let selectedPiece: string = "";
+	let selectedPieceIndicator: any;
 	let allowInput: boolean = false;
 	let lastEmptyOffsetX: number = 0;
 	let lastEmptyOffsetY: number = 0;
@@ -138,8 +139,31 @@
 		return true;
 	};
 
+	const getIdPosition = (id: string, map: any) => {
+		for (let x = 0; x < map.length; x++) {
+			for (let y = 0; y < map[0].length; y++) {
+				if (map[x][y] === null) continue;
+				if (map[x][y].id === id) return { x, y };
+			}
+		}
+		return { x: 0, y: 0 };
+	};
+
 	const animate = () => {
 		const newPieceMap = calculateNewPieceMap();
+		if (isDragging) {
+			const currentSelectedPos = getIdPosition(selectedPiece, newPieceMap);
+			if (currentSelectedPos.x === selectedPos.x && currentSelectedPos.y === selectedPos.y) {
+				if ($isMoving) {
+					isMoving.set(false);
+				}
+			} else {
+				if (!$isMoving) {
+					isMoving.set(true);
+				}
+			}
+		}
+
 		if (!isMatrixTheSame(newPieceMap, tempPieceMap)) {
 			lastPieceMap = tempPieceMap.map((row: any[]) => [...row]);
 			tempPieceMap = newPieceMap.map((row: any[]) => [...row]);
@@ -195,16 +219,6 @@
 				}
 			}
 		}
-	};
-
-	const getIdPosition = (id: string, map: any) => {
-		for (let x = 0; x < map.length; x++) {
-			for (let y = 0; y < map[0].length; y++) {
-				if (map[x][y] === null) continue;
-				if (map[x][y].id === id) return { x, y };
-			}
-		}
-		return { x: 0, y: 0 };
 	};
 
 	const floodFill = (posX: number, posY: number, targetColor: string) => {
@@ -282,6 +296,7 @@
 		}
 		moveCount.set(0);
 		hasWon.set(false);
+		isMoving.set(false);
 		newWin.set(true);
 		showDashBoard.set(false);
 		completedColors.set(new Array(colorCount.length).fill(false));
@@ -318,6 +333,14 @@
 				piece.endFill();
 				piece.endFill();
 			},
+		});
+		const pixelPosX = selectedPos.x * gap + selectedPos.x * pieceSize + gap;
+		const pixelPosY = selectedPos.y * gap + selectedPos.y * pieceSize + gap;
+		selectedPieceIndicator.position.set(pixelPosX, pixelPosY);
+		selectedPieceIndicator.tint = color;
+		gsap.to(selectedPieceIndicator, {
+			duration: 0.2,
+			alpha: 1,
 		});
 	};
 
@@ -523,6 +546,11 @@
 				piece.endFill();
 			},
 		});
+
+		gsap.to(selectedPieceIndicator, {
+			duration: 0.2,
+			alpha: 0,
+		});
 	};
 
 	async function sendWin(moves, iso) {
@@ -575,6 +603,7 @@
 		offset = { x: 0, y: 0 };
 		pixelOffsetDelta = { x: 0, y: 0 };
 		lockedAxis = null;
+		isMoving.set(false);
 	};
 
 	const getColorCount = () => {
@@ -658,6 +687,17 @@
 			}
 		}
 
+		selectedPieceIndicator = new PIXI.Graphics();
+		selectedPieceIndicator.lineStyle(5, 0xffffff, 1);
+		selectedPieceIndicator.drawRoundedRect(0, 0, pieceSize, pieceSize, borderRadius);
+		selectedPieceIndicator.zIndex = -100;
+		selectedPieceIndicator.name = "selectedPieceIndicator";
+		selectedPieceIndicator.alpha = 0;
+		const blurFilter = new PIXI.BlurFilter();
+		blurFilter.blur = 5;
+		selectedPieceIndicator.filters = [blurFilter];
+
+		app.stage.addChild(selectedPieceIndicator);
 		app.stage.eventMode = "static";
 		app.stage.sortableChildren = true;
 

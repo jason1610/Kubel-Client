@@ -9,8 +9,30 @@
 		selectedColor,
 	} from "./GameStore";
 	import confetti from "canvas-confetti";
-
 	$: counterRef = null;
+
+	function getReadableFontColor(hexColor) {
+		// Convert the hex color to RGB
+		const rgbColor = hexToRgb(hexColor);
+
+		// Calculate the relative luminance of the color
+		const luminance = (0.299 * rgbColor.r + 0.587 * rgbColor.g + 0.114 * rgbColor.b) / 255;
+
+		// Return either black or white depending on the luminance
+		return luminance > 0.5 ? "#000000" : "#FFFFFF";
+	}
+
+	function hexToRgb(hex) {
+		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+		return result
+			? {
+					r: parseInt(result[1], 16),
+					g: parseInt(result[2], 16),
+					b: parseInt(result[3], 16),
+			  }
+			: null;
+	}
 
 	onMount(() => {
 		const handleConfetti = () => {
@@ -66,12 +88,16 @@
 
 <div
 	bind:this={counterRef}
-	class="counter {$newWin && $hasWon ? 'new-win' : ''} {$hasWon ? 'win' : ''}"
+	class="counter {$newWin && $hasWon ? 'new-win' : ''} {$hasWon ? 'win' : ''} {$isMoving
+		? 'moving'
+		: ''}"
 	style={$selectedColor !== null
-		? `box-shadow: 0 0 25px 0 ${$selectedColor}; border-radius: 50%`
+		? `box-shadow: 0 0 15px 0 ${$selectedColor}; background: ${$selectedColor};`
 		: ""}
 >
-	<p>{$moveCount}</p>
+	<p style={$selectedColor !== null ? `color: ${getReadableFontColor($selectedColor)}` : ""}>
+		{$isMoving ? $moveCount + 1 : $moveCount}
+	</p>
 </div>
 
 <style>
@@ -80,13 +106,13 @@
 		align-items: center;
 		justify-content: center;
 		background: rgb(240, 236, 236);
-		background: linear-gradient(to bottom, rgb(255, 255, 255), rgb(205, 194, 194));
+		/* background: linear-gradient(to bottom, rgb(255, 255, 255), rgb(205, 194, 194)); */
 		min-width: 50px;
 		height: 50px;
 		border-radius: 20px;
 		margin-bottom: 50px;
 		padding: 10px;
-		transition: box-shadow 0.5s ease, border-radius 0.2s ease-out;
+		transition: box-shadow 0.5s ease, border-radius 0.2s ease-out, background 0.2s ease-out;
 	}
 	.win {
 		background: rgb(236, 203, 54);
@@ -94,6 +120,10 @@
 	}
 	.new-win {
 		animation: win 0.5s ease;
+	}
+	.counter.moving p {
+		color: grey;
+		font-size: 30px;
 	}
 
 	@keyframes win {
@@ -114,5 +144,6 @@
 		color: rgb(41, 43, 38);
 		text-align: center;
 		font-family: "Jura", sans-serif;
+		transition: color 0.2s ease-out, font-size 0.2s ease;
 	}
 </style>
