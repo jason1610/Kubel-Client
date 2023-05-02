@@ -19,11 +19,14 @@
 
 	let time = 0;
 	const blur = 5;
+	let lastFrameTime = 0;
+	let nextFrameTime = 0;
 	const brightness = 0.6;
 	const noiseDensity = 50;
-	const colorChangeRate = 0.05;
-	const paleteChangeRate = 0.01;
-	const animationSpeed = 0.0005;
+	const colorChangeRate = 0.2;
+	const paleteChangeRate = 0.015;
+	const animationSpeed = 0.0015;
+	const frameRate = 1000 / 24;
 	const defaultPalette: number[][] = [
 		[5, 5, 5],
 		[55, 55, 55],
@@ -80,25 +83,48 @@
 		const imageData = miniCtx.createImageData(miniWidth, miniHeight);
 		const data = imageData.data;
 
+		let currentColor = [0, 0, 0];
+		let newColor = [0, 0, 0];
+
+		const xDividedByNoiseDensity = new Array(miniWidth);
+		const yDividedByNoiseDensity = new Array(miniHeight);
+
+		for (let x = 0; x < miniWidth; x++) {
+			xDividedByNoiseDensity[x] = x / noiseDensity;
+		}
+
+		for (let y = 0; y < miniHeight; y++) {
+			yDividedByNoiseDensity[y] = y / noiseDensity;
+		}
+
 		for (let x = 0; x < miniWidth; x++) {
 			for (let y = 0; y < miniHeight; y++) {
 				const index = (x + y * miniWidth) * 4;
-				const currentColor = prevImageData // Use the previous frame's colors as the currentColor
-					? [prevImageData[index], prevImageData[index + 1], prevImageData[index + 2]]
-					: [0, 0, 0]; // If there's no previous frame, use black as the initial color
-				const noiseValue = noise3D(x / noiseDensity, y / noiseDensity, time);
+
+				if (prevImageData) {
+					currentColor[0] = prevImageData[index];
+					currentColor[1] = prevImageData[index + 1];
+					currentColor[2] = prevImageData[index + 2];
+				} else {
+					currentColor[0] = 0;
+					currentColor[1] = 0;
+					currentColor[2] = 0;
+				}
+
+				const noiseValue = noise3D(xDividedByNoiseDensity[x], yDividedByNoiseDensity[y], time);
 				const targetColor = getTargetColor(noiseValue);
 
-				const newColor = currentColor.map((color, i) => {
-					return color + (targetColor[i] - color) * colorChangeRate;
-				});
+				for (let i = 0; i < 3; i++) {
+					newColor[i] = currentColor[i] + (targetColor[i] - currentColor[i]) * colorChangeRate;
+				}
 
-				data[index] = newColor[0]; // Red
-				data[index + 1] = newColor[1]; // Green
-				data[index + 2] = newColor[2]; // Blue
-				data[index + 3] = 255; // Alpha
+				data[index] = newColor[0];
+				data[index + 1] = newColor[1];
+				data[index + 2] = newColor[2];
+				data[index + 3] = 255;
 			}
 		}
+
 		prevImageData = data;
 		time += animationSpeed;
 		miniCtx.putImageData(imageData, 0, 0);
@@ -106,9 +132,13 @@
 		ctx.filter = `blur(${blur}px) brightness(${brightness})`;
 	};
 
-	const animate = () => {
-		drawNoise();
-		lerpCurrentPalette();
+	const animate = (currentTime) => {
+		if (currentTime >= nextFrameTime) {
+			drawNoise();
+			lerpCurrentPalette();
+			lastFrameTime = currentTime;
+			nextFrameTime = currentTime + frameRate;
+		}
 		requestAnimationFrame(animate);
 	};
 
@@ -119,7 +149,7 @@
 		}
 		ctx = canvas.getContext("2d");
 		updateCanvasSize();
-		animate();
+		requestAnimationFrame(animate);
 		window.addEventListener("resize", updateCanvasSize);
 		completedColors.subscribe(() => {
 			if ($palette && $completedColors) {

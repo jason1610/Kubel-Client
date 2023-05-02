@@ -91,9 +91,7 @@
 	class="counter {$newWin && $hasWon ? 'new-win' : ''} {$hasWon ? 'win' : ''} {$isMoving
 		? 'moving'
 		: ''}"
-	style={$selectedColor !== null
-		? `box-shadow: 0 0 15px 0 ${$selectedColor}; background: ${$selectedColor};`
-		: ""}
+	style={$selectedColor !== null ? `background: ${$selectedColor};` : ""}
 >
 	<p style={$selectedColor !== null ? `color: ${getReadableFontColor($selectedColor)}` : ""}>
 		{$isMoving ? $moveCount + 1 : $moveCount}
@@ -112,7 +110,7 @@
 		border-radius: 20px;
 		margin-bottom: 50px;
 		padding: 10px;
-		transition: box-shadow 0.5s ease, border-radius 0.2s ease-out, background 0.2s ease-out;
+		transition: background 0.2s ease-out;
 	}
 	.win {
 		background: rgb(236, 203, 54);
