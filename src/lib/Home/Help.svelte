@@ -25,9 +25,9 @@
 
 		<h2>How to play</h2>
 		<p>
-			<span>Click and drag</span> a piece to move the row or collumn. Win the game by moving
-			all the pieces of the <span>same color</span> next to each other. Use as few moves as possible
-			to get the best score. New puzzles every day!
+			<span>Click and drag</span> the pieces to move them. Win the game by moving all the pieces
+			of the same color next to each other. Use as few moves as possible to get the best score.
+			New puzzles every day!
 		</p>
 		<br />
 		<p style="text-align: center; font-weight:bold">😄Good luck & have fun!😄</p>
@@ -139,7 +139,11 @@
 		font-size: 1.7rem;
 		font-weight: bold;
 	}
-	span {
+	span {	
 		font-weight: bold;
+	}
+
+	.card-container::-webkit-scrollbar {
+		width: 4px;
 	}
 </style>

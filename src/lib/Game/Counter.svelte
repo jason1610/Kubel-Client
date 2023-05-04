@@ -143,5 +143,6 @@
 		text-align: center;
 		font-family: "Jura", sans-serif;
 		transition: color 0.2s ease-out, font-size 0.2s ease;
+		user-select: none;
 	}
 </style>

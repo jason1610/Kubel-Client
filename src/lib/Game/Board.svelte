@@ -29,10 +29,8 @@
 	let colorCount: number[];
 	let app: PIXI.Application;
 	let canvas: HTMLCanvasElement;
-	const pieceSpeed: number = 0.5;
-	// old = 0.4
+	const pieceSpeed: number = 0.4;
 	const piecePixelOffsetStrength: number = 0.2;
-	// old = 0.15
 	let gridSize: number = mapData.pieceMap.length;
 	const cellSize: number = canvasSize / gridSize;
 	const borderRadius: number = cellSize / 7;
